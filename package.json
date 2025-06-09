@@ -1,0 +1,31 @@
+{
+  "name": "unisuchtpraevention",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/Kirschn/UniSuchtpraevention#readme",
+  "bugs": {
+    "url": "https://github.com/Kirschn/UniSuchtpraevention/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kirschn/UniSuchtpraevention.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "start": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "dependencies": {
+    "@adminjs/express": "^6.1.1",
+    "@adminjs/sequelize": "^4.1.1",
+    "axios": "^1.9.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "genius-lyrics": "^4.4.7",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
+  }
+}
