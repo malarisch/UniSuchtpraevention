@@ -14,16 +14,19 @@ export const page = {
   label: 'GeniusTool',
   component: Components.GeniusTool,
   handler: async (request, response, context) => {
-    const { input } = request.payload || {}
-
-    if (!input) {
-      return { message: 'Kein Text eingegeben.' }
-    }
-    if (input.type == "search") {
-      const result = await GeniusFetcher.searchSong(input.searchString)
-      return { message: result }  
-    } else if (input.type == "findOrCreate") {
-      //TODO
+   
+    console.log("Got Input:", request.payload)
+    if (request.payload.type == "search") {
+      const result = await GeniusFetcher.searchSong(request.payload.searchString)
+      return { type: "search", message: result }  
+    } else if (request.payload.type == "findOrCreate") {
+      
+      return {
+        type: "findOrCreate",
+        message: await GeniusFetcher.addSongAndArtistToDatabase(
+          await GeniusFetcher.getSong(request.payload.songId)
+        )
+      }
     }
   }
 }

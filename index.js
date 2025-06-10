@@ -7,6 +7,7 @@ import 'dotenv/config'
 import * as database from './modules/database.mjs'
 import * as GeniusTool from './admin/GeniusToolPage.mjs'
 import {componentLoader, Components } from './admin/components.mjs'
+import * as UserResources from './admin/resources.mjs';
 
 const PORT = process.env.PORT
 
@@ -21,7 +22,7 @@ const start = async () => {
     const app = express()
     await database.sync()
     const admin = new AdminJS({
-        resources: [database.Album, database.Artist, database.Song],
+        resources: [database.Album, database.Artist, UserResources.SongsResource, database.substanceRating],
         componentLoader,
         pages: {
             GeniusTool: GeniusTool.page

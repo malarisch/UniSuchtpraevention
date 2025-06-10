@@ -8,6 +8,7 @@ const GeniusTool = () => {
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [dataOutput, setDataOutput] = useState('');
 
 
 
@@ -16,7 +17,7 @@ const GeniusTool = () => {
     const response = await api.getPage({
       method: 'post',
       pageName: 'GeniusTool',
-      data: { input }
+      data: { type: "search", searchString: input }
     })
     var mapped = response.data.message.map((row) => {
       return (
@@ -34,7 +35,7 @@ const GeniusTool = () => {
             {row.result.release_date_with_abbreviated_month_for_display}
           </TableCell>
           <TableCell>
-            <Button onClick={handleAdd(row.result.id)}/>
+            <Button mt="lg" onClick={(e) => handleAdd(row.result.id)}>Hinzufügen</Button>
           </TableCell>
         </TableRow>
       )
@@ -43,6 +44,15 @@ const GeniusTool = () => {
     setLoading(false)
   }
   const handleAdd = async (id) => {
+    const response = await api.getPage({
+      method: "post",
+      pageName: 'GeniusTool',
+      data: {
+        type: "findOrCreate",
+        songId: id
+      }
+    })
+    setDataOutput(response.data.message);
 
   }
 
@@ -59,6 +69,14 @@ const GeniusTool = () => {
       <Button mt="lg" onClick={handleClick} disabled={loading}>
         {loading ? 'Lädt...' : 'Absenden'}
       </Button>
+      {dataOutput && (
+        <Box mt="xl" variant="white">
+          <H2>API Response</H2>
+          <TextArea>
+            {JSON.stringify(dataOutput)}
+          </TextArea>
+        </Box>
+      )}
       {output && (
         <Box mt="xl" p="lg" variant="white">
           <H2>Antwort</H2>
