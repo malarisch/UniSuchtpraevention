@@ -1,6 +1,6 @@
-import { addRatingToDb, rateLyrics } from '../src/modules/aiConnector.mjs';
-import * as database from '../src/modules/database.mjs'
-import * as lyricsFetcher from '../src/modules/lyricsFetcher.mjs'
+import { addRatingToDb, rateLyrics } from '../modules/aiConnector.mjs';
+import * as database from '../modules/database.mjs'
+import * as lyricsFetcher from '../modules/lyricsFetcher.mjs'
 
 async function hasAnalysis(response, request, context) {
 

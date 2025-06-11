@@ -4,10 +4,10 @@ import * as AdminJSSequelize from '@adminjs/sequelize'
 
 import express from 'express'
 import 'dotenv/config'
-import * as database from './modules/database.mjs'
-import * as GeniusTool from './admin/GeniusToolPage.mjs'
-import {componentLoader, Components } from './admin/components.mjs'
-import * as UserResources from './admin/resources.mjs';
+import * as database from './src/modules/database.mjs'
+import * as GeniusTool from './src/admin/GeniusToolPage.mjs'
+import {componentLoader, Components } from './src/admin/components.mjs'
+import * as UserResources from './src/admin/resources.mjs';
 
 const PORT = process.env.PORT
 

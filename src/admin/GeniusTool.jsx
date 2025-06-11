@@ -59,7 +59,7 @@ const GeniusTool = () => {
   return (
     <Box variant="grey">
       <H2>SongSuche</H2>
-      <Text mb="lg">GeniusAPI</Text>
+      <Text mb="lg">Genius Search API</Text>
       <Input
         value={input}
         onChange={(e) => setInput(e.target.value)}
