@@ -1,6 +1,16 @@
-import { addRatingToDb, rateLyrics } from '../modules/aiConnector.mjs';
+import { addRatingToDb, rateLyrics, setLogger as aiSetLogger } from '../modules/aiConnector.mjs';
 import * as database from '../modules/database.mjs'
 import * as lyricsFetcher from '../modules/lyricsFetcher.mjs'
+
+var logger = null
+export function setLogger(loggerIn) {
+    logger = loggerIn;
+    aiSetLogger(logger);
+    database.setLogger(logger)
+    lyricsFetcher.setLogger(logger)
+}
+
+
 
 async function hasAnalysis(response, request, context) {
 
@@ -26,9 +36,9 @@ export const SongsResource = {
                     if (!record) {
                         throw new Error('Kein Datensatz gefunden');
                     }
-                    console.log("Fetching from: ", record.params.geniusURL)
+                    logger.info("Fetching from: ", record.params.geniusURL)
                     let fetchedLyrics = await lyricsFetcher.lyricsFromURL(record.params.geniusURL);
-                    console.log("Lyrics: ", fetchedLyrics)
+                    logger.info("Lyrics: ", fetchedLyrics)
                     try {
                         await record.update({ lyrics: fetchedLyrics })
                     } catch (e) {

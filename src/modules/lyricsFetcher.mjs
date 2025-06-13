@@ -1,9 +1,13 @@
 import axios, { isCancel, AxiosError } from 'axios';
 import 'dotenv/config'
-import Genius from 'genius-lyrics';
-import * as database from './database.mjs'
 import { parse as htmlParser } from 'node-html-parser'
 import * as fs from 'node:fs';
+
+var logger = null
+export function setLogger(loggerIn) {
+    logger = loggerIn;
+}
+
 
 
 async function getHTML(url) {

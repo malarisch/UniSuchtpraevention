@@ -4,6 +4,13 @@ import Genius from 'genius-lyrics';
 import * as database from './database.mjs'
 import * as html from 'node-html-parser'
 
+var logger = null
+export function setLogger(loggerIn) {
+    logger = loggerIn;
+    database.setLogger(logger)
+}
+
+
 const axiosInstance = axios.create({
     baseURL: "https://api.genius.com",
     headers: { "Authorization": "Bearer " + process.env.GENIUS_CLIENT_ACCESS_TOKEN }
@@ -13,13 +20,13 @@ const axiosInstance = axios.create({
 export const GeniusClient = new Genius.Client(process.env.GENIUS_CLIENT_ACCESS_TOKEN)
 
 export async function searchSong(songName) {
-    console.log("Searching Song: ", songName)
+    logger.info("Searching Song: ", songName)
     let searchRequest = await axiosInstance.get("/search", {
         params: {
             "q": songName
         }
     });
-    console.log("Found %d hits", searchRequest.data.response.hits.length)
+    logger.info("Found %d hits", searchRequest.data.response.hits.length)
     return searchRequest.data.response.hits
 }
 export async function getSong(id) {
@@ -70,7 +77,7 @@ export async function addSongAndArtistToDatabase(params) {
         for (var i in params.primary_artists) {
             let [artist, createdA] = await findCreateArtist(params.primary_artists[i])
             if (createdA || !await artist.hasSong(Song)) {
-                console.log(await artist.addSong(Song, { through: { isPrimaryArtist: true } }))
+                logger.info(await artist.addSong(Song, { through: { isPrimaryArtist: true } }))
             }
             artists.push({
                 wasCreated: createdA,
@@ -81,7 +88,7 @@ export async function addSongAndArtistToDatabase(params) {
             let [artist, createdB] = await findCreateArtist(params.featured_artists[i])
             if (createdB || !await artist.hasSong(Song)) {
                 try {
-                    console.log(await artist.addSong(Song, { through: { isPrimaryArtist: false } }))
+                    logger.info(await artist.addSong(Song, { through: { isPrimaryArtist: false } }))
                 } catch (e) {
                     database.fixSequelizeError(e)
                 }
@@ -109,7 +116,7 @@ export async function addSongAndArtistToDatabase(params) {
                 let [artist, createdA] = await findCreateArtist(params.album.primary_artists[i])
                 if (createdA || !await artist.hasAlbum(album)) {
                     try {
-                        console.log(await artist.addAlbum(album, { through: { isPrimaryArtist: false } }))
+                        logger.info(await artist.addAlbum(album, { through: { isPrimaryArtist: false } }))
                     } catch (e) {
                         database.fixSequelizeError(e)
                     }
@@ -119,7 +126,7 @@ export async function addSongAndArtistToDatabase(params) {
                 let [artist, createdB] = await findCreateArtist(params.album.featured_artists[i])
                 if (createdB || !await artist.hasAlbum(album)) {
                     try {
-                        console.log(await artist.addAlbum(album, { through: { isPrimaryArtist: false } }))
+                        logger.info(await artist.addAlbum(album, { through: { isPrimaryArtist: false } }))
                     } catch (e) {
                         database.fixSequelizeError(e)
                     }

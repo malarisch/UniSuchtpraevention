@@ -1,6 +1,6 @@
 {
-  "watch": ["src"],
-  "ext": "js,json",
+  "watch": ["src", ["."]],
+  "ext": "js,json,mjs",
   "ignore": ["node_modules"],
   "delay": "100"
 }

@@ -1,5 +1,8 @@
 import 'dotenv/config'
-
+var logger = null
+export function setLogger(loggerIn) {
+    logger = loggerIn;
+}
 
 import * as GeniusFetcher from '../modules/geniusFetcher.mjs'
 import { componentLoader, Components } from './components.mjs'
@@ -15,7 +18,7 @@ export const page = {
   component: Components.GeniusTool,
   handler: async (request, response, context) => {
    
-    console.log("Got Input:", request.payload)
+    logger.info("Got Input:", request.payload)
     if (request.payload.type == "search") {
       const result = await GeniusFetcher.searchSong(request.payload.searchString)
       return { type: "search", message: result }  

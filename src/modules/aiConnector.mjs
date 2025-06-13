@@ -7,6 +7,12 @@ import OpenAI from 'openai'
 import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";
 import * as fs from 'node:fs/promises'
+var logger = null
+export function setLogger(loggerIn) {
+    logger = loggerIn;
+    database.setLogger(logger)
+}
+
 
 const systemPrompt = await fs.readFile("./systemprompt.txt", "utf8");
 const sysPromptVer = 1
@@ -27,7 +33,7 @@ export const songAnalysisSchema = z.object(
 export const substancesSchema = z.object({"substances": z.array(songAnalysisSchema)});
 
 export async function rateLyrics(lyrics) {
-    console.log(lyrics)
+    logger.info(lyrics)
     const response = await openai.responses.parse({
         model: "gpt-4o",
         input: [
@@ -41,7 +47,7 @@ export async function rateLyrics(lyrics) {
             format: zodTextFormat(substancesSchema, "substance_rating_schema"),
         },
     });
-    console.log(response.output_parsed);
+    logger.info(response.output_parsed);
     return response.output_parsed;
 }
 
@@ -51,7 +57,7 @@ export async function addRatingToDb(ratings, songId) {
         element.songId = songId
         element.sysPromptVer = sysPromptVer
         let subst = await database.substanceRating.create(element)
-        console.log ("Added", subst)
+        logger.info ("Added", subst)
     };
 } catch (e) {
     database.fixSequelizeError(e)
