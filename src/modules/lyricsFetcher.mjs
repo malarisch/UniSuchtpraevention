@@ -1,10 +1,19 @@
-import axios, { isCancel, AxiosError } from 'axios';
+/**
+ * Helper functions for retrieving lyrics from Genius URLs.
+ * @module lyricsFetcher
+ */
+import axios from 'axios';
 import 'dotenv/config'
 import { parse as htmlParser } from 'node-html-parser'
 import * as fs from 'node:fs';
 
 import loggerConstructor from './logger.mjs'
 const logger = loggerConstructor()
+/**
+ * Download the HTML content of the given URL.
+ * @param {string} url
+ * @returns {Promise<import("axios").AxiosResponse>}
+ */
 
 
 
@@ -20,6 +29,12 @@ export class NoResultError extends Error {
     }
 }
 
+/**
+ * Extract raw lyrics text from Genius HTML markup.
+ * @param {string} html
+ * @returns {string}
+ * @throws {NoResultError} if no lyrics are present in the markup
+ */
 async function parseHTML(html) {
     let document = htmlParser(html)
     const lyricsRoot = document.getElementById("lyrics-root")
@@ -47,6 +62,11 @@ async function parseHTML(html) {
     return lyrics
 }
 
+/**
+ * Convenience wrapper that fetches a page and parses the lyrics.
+ * @param {string} url
+ * @returns {Promise<string|Error>} Lyrics string or error
+ */
 export async function lyricsFromURL(url) {
     try {
         let html = await getHTML(url)

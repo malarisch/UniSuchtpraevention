@@ -1,3 +1,6 @@
+/**
+ * Background worker processing BullMQ jobs for fetching songs and lyrics.
+ */
 process.env.APP_NAME = "worker"
 
 import { Worker } from 'bullmq';

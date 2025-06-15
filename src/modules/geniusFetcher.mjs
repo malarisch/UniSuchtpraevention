@@ -1,4 +1,9 @@
-import axios, { isCancel, AxiosError } from 'axios';
+/**
+ * Utilities for interacting with the Genius API and persisting songs,
+ * artists and albums in the database.
+ * @module geniusFetcher
+ */
+import axios from 'axios';
 import 'dotenv/config'
 import Genius from 'genius-lyrics';
 import * as database from './database.mjs'
@@ -15,6 +20,11 @@ const axiosInstance = axios.create({
 
 export const GeniusClient = new Genius.Client(process.env.GENIUS_CLIENT_ACCESS_TOKEN)
 
+/**
+ * Search the Genius API for songs matching the given name.
+ * @param {string} songName
+ * @returns {Promise<any[]>} Array of search hits from Genius
+ */
 export async function searchSong(songName) {
     logger.info("Searching Song: ", songName)
     let searchRequest = await axiosInstance.get("/search", {
@@ -25,6 +35,11 @@ export async function searchSong(songName) {
     logger.info("Found %d hits", searchRequest.data.response.hits.length)
     return searchRequest.data.response.hits
 }
+/**
+ * Retrieve a single song from the Genius API by its ID.
+ * @param {number} id
+ * @returns {Promise<any>} Song details
+ */
 export async function getSong(id) {
     let song = await axiosInstance.get("/songs/" + id, {
         params: {
@@ -33,6 +48,12 @@ export async function getSong(id) {
     })
     return song.data.response.song;
 }
+/**
+ * Create or update song, artist and album entries in the database based on
+ * a Genius API song object.
+ * @param {any} params Song object returned by Genius
+ * @returns {Promise<object|undefined>} Details about created records
+ */
 export async function addSongAndArtistToDatabase(params) {
     try {
         let [Song, songCreated] = await database.Song.findOrCreate({
