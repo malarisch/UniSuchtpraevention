@@ -16,8 +16,8 @@
   "main": "index.js",
   "start": "index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "dependencies": {
     "@adminjs/express": "^6.1.1",
