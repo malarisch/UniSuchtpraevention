@@ -3,12 +3,8 @@ import 'dotenv/config'
 import Genius from 'genius-lyrics';
 import * as database from './database.mjs'
 import * as html from 'node-html-parser'
-
-var logger = null
-export function setLogger(loggerIn) {
-    logger = loggerIn;
-    database.setLogger(logger)
-}
+import loggerConstructor from './logger.mjs'
+const logger = loggerConstructor()
 
 
 const axiosInstance = axios.create({

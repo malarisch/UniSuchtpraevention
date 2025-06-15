@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
 import { Box, Button, TextArea, Table, TableHead, TableBody, TableRow, TableCell, H2, Text, Input } from '@adminjs/design-system'
 import { ApiClient } from 'adminjs'
-var logger = null
-export function setLogger(loggerIn) {
-    logger = loggerIn;
-}
+import loggerConstructor from '../modules/logger.mjs'
+const logger = loggerConstructor()
+
 const api = new ApiClient()
 
 const GeniusTool = () => {

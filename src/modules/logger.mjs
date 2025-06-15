@@ -5,10 +5,10 @@ dotenv.config();
 
 
 
-export default function (APP_NAME) {
+export default function () {
     const stream = pinoLoki({
         host: process.env.LOKI_URL,
-        labels: { app: APP_NAME || 'unnamed' },
+        labels: { app: process.env.LOGGER_APP_NAME || 'unnamed' },
         interval: 5, // batch every 5 sec
         timeout: 10000,
         basicAuth: process.env.LOKI_BASIC_AUTH,

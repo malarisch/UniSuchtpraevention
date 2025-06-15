@@ -3,15 +3,13 @@ process.env.APP_NAME = "worker"
 import { Worker } from 'bullmq';
 import IORedis from 'ioredis';
 import 'dotenv/config'
-import * as geniusFetcher from './src/modules/geniusFetcher.mjs'
-import * as lyricsFetcher from './src/modules/lyricsFetcher.mjs'
-import * as database from './src/modules/database.mjs'
-import loggerConstructor from './src/modules/logger.mjs'
+import * as geniusFetcher from './modules/geniusFetcher.mjs'
+import * as lyricsFetcher from './modules/lyricsFetcher.mjs'
+import * as database from './modules/database.mjs'
+import loggerConstructor from './modules/logger.mjs'
 const logger = loggerConstructor("worker")
 logger.debug("Worker Script loaded")
-geniusFetcher.setLogger(logger)
-lyricsFetcher.setLogger(logger)
-database.setLogger(logger)
+
 database.sync()
 const connection = new IORedis({ maxRetriesPerRequest: null, host: process.env.REDIS_HOST, port: process.env.REDIS_PORT });
 

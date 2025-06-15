@@ -6,16 +6,13 @@ import Arena from 'bull-arena';
 import { Queue, FlowProducer } from "bullmq";
 import express from 'express'
 import 'dotenv/config'
-import * as database from './src/modules/database.mjs'
-import * as GeniusTool from './src/admin/GeniusToolPage.mjs'
-import {componentLoader, Components } from './src/admin/components.mjs'
-import * as UserResources from './src/admin/resources.mjs';
-import loggerConstructor from './src/modules/logger.mjs'
-const logger = loggerConstructor("webapp")
+import * as database from './modules/database.mjs'
+import * as GeniusTool from './admin/GeniusToolPage.mjs'
+import {componentLoader, Components } from './admin/components.mjs'
+import * as UserResources from './admin/resources.mjs';
+import loggerConstructor from './modules/logger.mjs'
+const logger = loggerConstructor()
 logger.debug("Script loaded")
-database.setLogger(logger)
-GeniusTool.setLogger(logger)
-UserResources.setLogger(logger)
 
 const PORT = process.env.PORT
 

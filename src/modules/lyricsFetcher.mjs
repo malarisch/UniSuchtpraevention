@@ -3,10 +3,8 @@ import 'dotenv/config'
 import { parse as htmlParser } from 'node-html-parser'
 import * as fs from 'node:fs';
 
-var logger = null
-export function setLogger(loggerIn) {
-    logger = loggerIn;
-}
+import loggerConstructor from './logger.mjs'
+const logger = loggerConstructor()
 
 
 

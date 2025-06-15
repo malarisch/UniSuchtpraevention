@@ -1,8 +1,6 @@
 import 'dotenv/config'
-var logger = null
-export function setLogger(loggerIn) {
-    logger = loggerIn;
-}
+import loggerConstructor from '../modules/logger.mjs'
+const logger = loggerConstructor()
 
 import * as GeniusFetcher from '../modules/geniusFetcher.mjs'
 import { componentLoader, Components } from './components.mjs'

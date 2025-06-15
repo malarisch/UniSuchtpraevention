@@ -11,13 +11,13 @@
     "url": "git+https://github.com/Kirschn/UniSuchtpraevention.git"
   },
   "license": "ISC",
-  "author": "",
+  "author": "Mala Wolff",
   "type": "module",
-  "main": "index.js",
-  "start": "index.js",
+  "main": "src/webserver",
+  "start": "src/webserver",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node src/webserver.js",
+    "dev": "nodemon src/webserver.js"
   },
   "dependencies": {
     "@adminjs/express": "^6.1.1",
@@ -37,7 +37,6 @@
     "pino": "^9.7.0",
     "pino-loki": "^2.6.0",
     "sequelize": "^6.37.7",
-    "sqlite3": "^5.1.7",
     "zod": "^3.25.57"
   },
   "devDependencies": {

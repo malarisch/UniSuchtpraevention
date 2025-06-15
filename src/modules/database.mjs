@@ -1,9 +1,7 @@
 import {Sequelize, Model, DataTypes} from 'sequelize';
 import 'dotenv/config'
-var logger = null
-export function setLogger(loggerIn) {
-    logger = loggerIn;
-}
+import loggerConstructor from './logger.mjs'
+const logger = loggerConstructor()
 
 const sequelize = new Sequelize(process.env.PG_DB, process.env.PG_USER, process.env.PG_PASSWORD, {
   host: process.env.PG_HOST,

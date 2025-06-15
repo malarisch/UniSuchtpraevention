@@ -1,14 +1,8 @@
-import { addRatingToDb, rateLyrics, setLogger as aiSetLogger } from '../modules/aiConnector.mjs';
+import { addRatingToDb, rateLyrics } from '../modules/aiConnector.mjs';
 import * as database from '../modules/database.mjs'
 import * as lyricsFetcher from '../modules/lyricsFetcher.mjs'
-
-var logger = null
-export function setLogger(loggerIn) {
-    logger = loggerIn;
-    aiSetLogger(logger);
-    database.setLogger(logger)
-    lyricsFetcher.setLogger(logger)
-}
+import loggerConstructor from '../modules/logger.mjs'
+const logger = loggerConstructor()
 
 
 
