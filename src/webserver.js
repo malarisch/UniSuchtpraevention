@@ -1,3 +1,7 @@
+/**
+ * Entry point for the Express based AdminJS dashboard.
+ * Sets up all routes and starts the HTTP server.
+ */
 import {ComponentLoader, AdminJS} from 'adminjs'
 import AdminJSExpress from '@adminjs/express'
 import * as AdminJSSequelize from '@adminjs/sequelize'
@@ -41,6 +45,10 @@ const arena = Arena({
     ]
 })
 
+/**
+ * Initialise database connection and launch the admin dashboard server.
+ * @returns {Promise<void>}
+ */
 const start = async () => {
     const app = express()
     await database.sync()
