@@ -17,7 +17,8 @@
   "start": "src/webserver",
   "scripts": {
     "start": "node src/webserver.js",
-    "dev": "nodemon src/webserver.js"
+    "dev": "nodemon src/webserver.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@adminjs/express": "^6.1.1",
