@@ -70,7 +70,8 @@ export async function addSongAndArtistToDatabase(params: any) {
                 lyricsState: params.lyrics_state,
                 geniusId: params.id,
                 geniusURL: params.url,
-                meta: params
+                meta: params,
+                lang: params.language
 
 
             }

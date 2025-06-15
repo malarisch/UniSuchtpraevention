@@ -11,11 +11,12 @@ import { Queue, FlowProducer } from "bullmq";
 import express from 'express';
 import 'dotenv/config'
 import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './modules/index.ts'
-//@ts-ignore
+
 import * as GeniusTool from './admin/GeniusToolPage.ts' 
-//@ts-ignore
+import * as ArenaTool from "./admin/ArenaToolPage.ts"
+
 import {componentLoader, Components } from './admin/components.ts'
-//@ts-ignore
+
 import * as UserResources from './admin/resources.ts';
 
 const logger = await loggerConstructor.logger()
@@ -45,6 +46,12 @@ const arena = Arena({
             name: "songFetcher",
             hostId: "Webapp",
             redis: {host: process.env.REDIS_HOST, port: parseInt(process.env.REDIS_PORT as string)}
+        },
+        {
+            type: "bullmq",
+            name: "aiAnalysis",
+            hostId: "Webapp",
+            redis: {host: process.env.REDIS_HOST, port: parseInt(process.env.REDIS_PORT as string)}
         }
     ]
 })
@@ -60,7 +67,9 @@ const start = async () => {
         resources: [database.Album, database.Artist, UserResources.SongsResource, database.SubstanceRating],
         componentLoader,
         pages: {
-            GeniusTool: GeniusTool.page
+            GeniusTool: GeniusTool.page,
+            Arena: ArenaTool.page
+
         }
     })
 
