@@ -1,20 +1,19 @@
 /**
  * Background worker processing BullMQ jobs for fetching songs and lyrics.
  */
-process.env.APP_NAME = "worker"
 
 import { Worker } from 'bullmq';
-import IORedis from 'ioredis';
+import IORedis, { Redis } from 'ioredis';
 import 'dotenv/config'
-import * as geniusFetcher from './modules/geniusFetcher.mjs'
-import * as lyricsFetcher from './modules/lyricsFetcher.mjs'
-import * as database from './modules/database.mjs'
-import loggerConstructor from './modules/logger.mjs'
-const logger = loggerConstructor("worker")
+import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './modules/index.ts'
+import { InferAttributes, InferCreationAttributes } from 'sequelize';
+
+const logger = await loggerConstructor.logger()
 logger.debug("Worker Script loaded")
 
 database.sync()
-const connection = new IORedis({ maxRetriesPerRequest: null, host: process.env.REDIS_HOST, port: process.env.REDIS_PORT });
+
+const connection = new IORedis({ maxRetriesPerRequest: null, host: process.env.REDIS_HOST as string, port: parseInt(process.env.REDIS_PORT as string) as number });
 
 const songFetcherQueue = new Worker(
   'songFetcher',
@@ -42,18 +41,20 @@ const lyricsFetcherQueue = new Worker(
   async job => {
 
       console.log(job.data);
-      let song = null
+      let song: database.Song
       logger.info("lyricsFetcher got Job:", job.data)
       if (job.data.url == undefined && job.data.geniusId != undefined) {
         await job.updateData(await geniusFetcher.getSong(job.data.geniusId))
-        song = await database.Song.findOne({where: {"geniusId": job.data.geniusId}})
+        song = await database.Song.findOne({where: {"geniusId": job.data.geniusId}}) as database.Song
         await job.updateData(song)
       } else if (job.data.id != undefined) {
-        let song = await database.Song.findByPk(job.data.internalId)
+        song = await database.Song.findByPk(job.data.internalId) as database.Song
         await job.updateData(song)
       } else if (job.data.url != undefined) {
-        song = await database.Song.findOne({where: {"geniusURL": job.data.url}})
+        song = await database.Song.findOne({where: {"geniusURL": job.data.url}}) as database.Song
         await job.updateData(song)
+      } else {
+        return null
       }
       let lyrics = await lyricsFetcher.lyricsFromURL(job.data.geniusURL)
       logger.info("Got Lyrics " + lyrics.length)

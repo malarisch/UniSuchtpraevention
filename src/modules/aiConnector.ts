@@ -1,20 +1,22 @@
+
 /**
  * Functions that interact with the OpenAI API to analyse lyrics and persist
  * the results in the database.
  * @module aiConnector
  */
+import type { InferCreationAttributes } from 'sequelize';
 import axios, { isCancel, AxiosError } from 'axios';
 import 'dotenv/config'
 import Genius from 'genius-lyrics';
-import * as database from './database.mjs'
+
 import * as html from 'node-html-parser'
 import OpenAI from 'openai'
 import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";
 import * as fs from 'node:fs/promises'
-import loggerConstructor from './logger.mjs'
-const logger = loggerConstructor()
-
+import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './index.ts'
+console.log(loggerConstructor)
+const logger = await loggerConstructor.logger();
 /**
  * @typedef {Object} SongAnalysis
  * @property {string} substance Name of the detected substance
@@ -48,14 +50,22 @@ export const songAnalysisSchema = z.object(
 
     }
 )
-export const substancesSchema = z.object({"substances": z.array(songAnalysisSchema)});
-
+// These two fields are added before .create()
+export const substancesSchema: z.AnyZodObject = z.object({"substances": z.array(songAnalysisSchema)});
+type substancesSchema = {
+    substances: Array<
+    InferCreationAttributes<database.SubstanceRating> & {
+      songId?: number;
+      sysPromptVer?: number;
+    }
+  >;
+}
 /**
  * Send lyrics to OpenAI and return the parsed rating.
  * @param {string} lyrics Text to analyse
  * @returns {Promise<Substances>} Parsed result from the AI
  */
-export async function rateLyrics(lyrics) {
+export async function rateLyrics(lyrics: string) {
     logger.info(lyrics)
     const response = await openai.responses.parse({
         model: "gpt-4o",
@@ -70,8 +80,9 @@ export async function rateLyrics(lyrics) {
             format: zodTextFormat(substancesSchema, "substance_rating_schema"),
         },
     });
+
     logger.info(response.output_parsed);
-    return response.output_parsed;
+    return response.output_parsed as substancesSchema;
 }
 
 /**
@@ -80,12 +91,12 @@ export async function rateLyrics(lyrics) {
  * @param {number} songId ID of the song to associate
  * @returns {Promise<void>}
  */
-export async function addRatingToDb(ratings, songId) {
+export async function addRatingToDb(ratings: substancesSchema, songId: number) {
     try {
     for (const element of ratings.substances) {
         element.songId = songId
         element.sysPromptVer = sysPromptVer
-        let subst = await database.substanceRating.create(element)
+        let subst = await database.SubstanceRating.create(element)
         logger.info ("Added", subst)
     };
 } catch (e) {

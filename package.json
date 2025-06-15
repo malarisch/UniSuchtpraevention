@@ -12,13 +12,19 @@
   },
   "license": "ISC",
   "author": "Mala Wolff",
+  "main": "./",
+  "start": "./src/webserver.ts",
   "type": "module",
-  "main": "src/webserver",
-  "start": "src/webserver",
   "scripts": {
-    "start": "node src/webserver.js",
-    "dev": "nodemon src/webserver.js",
-    "test": "node --test"
+    "start": "npm run",
+    "dev": "ts-node --experimental-specifier-resolution=node -r tsconfig-paths/register src/webserver.ts",
+    "test": "node --test",
+    "build": "ls && tsc -p ./tsconfig.json"
+  },
+  "paths": {
+    "@moduless/*": [
+      "./src/modules/*"
+    ]
   },
   "dependencies": {
     "@adminjs/express": "^6.1.1",
@@ -38,12 +44,22 @@
     "pino": "^9.7.0",
     "pino-loki": "^2.6.0",
     "sequelize": "^6.37.7",
-    
-    "tsc": "^2.0.4",
+    "tsconfig-paths": "^4.2.0",
+    "vite-node": "^3.2.3",
     "zod": "^3.25.57"
   },
   "devDependencies": {
+    "@swc-node/register": "^1.10.10",
+    "@types/babel-core": "^6.25.10",
+    "@types/bull-arena": "^3.0.10",
+    "@types/express": "^5.0.3",
+    "@types/express-session": "^1.18.2",
+    "@types/flat": "^5.0.5",
+    "@types/react": "^18.3.23",
+    "@types/styled-components": "^5.1.34",
+    "@types/styled-system": "^5.1.23",
     "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }

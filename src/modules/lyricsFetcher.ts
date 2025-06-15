@@ -6,9 +6,8 @@ import axios from 'axios';
 import 'dotenv/config'
 import { parse as htmlParser } from 'node-html-parser'
 import * as fs from 'node:fs';
-
-import loggerConstructor from './logger.mjs'
-const logger = loggerConstructor()
+import { lyricsFetcher, database, logger as loggerConstructor } from './index.ts'
+const logger = await loggerConstructor.logger()
 /**
  * Download the HTML content of the given URL.
  * @param {string} url
@@ -17,7 +16,7 @@ const logger = loggerConstructor()
 
 
 
-async function getHTML(url) {
+async function getHTML(url: string) {
 
     let content = await axios.get(url)
     fs.writeFileSync("htmlout.html", content.data)
@@ -25,7 +24,7 @@ async function getHTML(url) {
 }
 export class NoResultError extends Error {
     constructor() {
-        super(null)
+        super(undefined)
     }
 }
 
@@ -35,7 +34,7 @@ export class NoResultError extends Error {
  * @returns {string}
  * @throws {NoResultError} if no lyrics are present in the markup
  */
-async function parseHTML(html) {
+async function parseHTML(html: string) {
     let document = htmlParser(html)
     const lyricsRoot = document.getElementById("lyrics-root")
     
@@ -67,13 +66,13 @@ async function parseHTML(html) {
  * @param {string} url
  * @returns {Promise<string|Error>} Lyrics string or error
  */
-export async function lyricsFromURL(url) {
+export async function lyricsFromURL(url: string): Promise<string> {
     try {
         let html = await getHTML(url)
         let lyrics = await parseHTML(html.data)
         return lyrics;
-    } catch (e) {
-        return e
+    } catch (e: any) {
+        return e.message
     }
 
 

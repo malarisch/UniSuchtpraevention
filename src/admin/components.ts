@@ -3,7 +3,7 @@ import { ComponentLoader } from 'adminjs'
 const componentLoader = new ComponentLoader()
 
 const Components = {
-    GeniusTool: componentLoader.add('GeniusTool', './GeniusTool.jsx'),
+    GeniusTool: componentLoader.add('GeniusTool', './GeniusTool'),
     // other custom components
 }
 

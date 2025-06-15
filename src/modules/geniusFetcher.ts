@@ -5,11 +5,12 @@
  */
 import axios from 'axios';
 import 'dotenv/config'
-import Genius from 'genius-lyrics';
-import * as database from './database.mjs'
-import * as html from 'node-html-parser'
-import loggerConstructor from './logger.mjs'
-const logger = loggerConstructor()
+import Genius, { ArtistsClient } from 'genius-lyrics';
+import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './index.ts'
+import { CreationOptional, InferAttributes, InferCreationAttributes } from 'sequelize';
+import { Album, Artist } from './database.ts';
+
+const logger = await loggerConstructor.logger()
 
 
 const axiosInstance = axios.create({
@@ -25,7 +26,7 @@ export const GeniusClient = new Genius.Client(process.env.GENIUS_CLIENT_ACCESS_T
  * @param {string} songName
  * @returns {Promise<any[]>} Array of search hits from Genius
  */
-export async function searchSong(songName) {
+export async function searchSong(songName: string) {
     logger.info("Searching Song: ", songName)
     let searchRequest = await axiosInstance.get("/search", {
         params: {
@@ -40,7 +41,10 @@ export async function searchSong(songName) {
  * @param {number} id
  * @returns {Promise<any>} Song details
  */
-export async function getSong(id) {
+export async function getSong(id: number | string) {
+    if (typeof id == "number") {
+        id = String(id)
+    }
     let song = await axiosInstance.get("/songs/" + id, {
         params: {
             text_format: "plain"
@@ -54,13 +58,15 @@ export async function getSong(id) {
  * @param {any} params Song object returned by Genius
  * @returns {Promise<object|undefined>} Details about created records
  */
-export async function addSongAndArtistToDatabase(params) {
+export async function addSongAndArtistToDatabase(params: any) {
     try {
+        let DateObj: Date = new Date(params.release_date_for_display)
+
         let [Song, songCreated] = await database.Song.findOrCreate({
             where: { geniusId: params.id },
             defaults: {
                 "title": params.title,
-                releaseDate: Date.parse(params.release_date_for_display),
+                releaseDate: DateObj,
                 lyricsState: params.lyrics_state,
                 geniusId: params.id,
                 geniusURL: params.url,
@@ -69,21 +75,34 @@ export async function addSongAndArtistToDatabase(params) {
 
             }
         })
-        async function findCreateArtist(artist) {
-            return await database.Artist.findOrCreate({
+        async function findCreateArtist(artistVal: any): Promise<ArtistArray> {
+            
+            var [artist, wasCreated] = await database.Artist.findOrCreate({
                 where: {
-                    geniusId: artist.id
+                    geniusId: artistVal.id
                 },
                 defaults: {
-                    name: artist.name,
-                    geniusId: artist.id,
-                    geniusURL: artist.url,
-                    meta: artist
-                },
+                    name: artistVal.name,
+                    geniusId: artistVal.id,
+                    geniusURL: artistVal.url,
+                    meta: artistVal
+                } as InferCreationAttributes<Artist>,
                 include: database.Song
             })
+            if (typeof artist === "boolean") {
+                throw new Error("Artist was somehow bool - Database corrupt?")
+            } else {
+                return {
+                    wasCreated: wasCreated,
+                    artist: artist
+                }
+            }
         }
-        var artists = []
+        interface ArtistArray {
+            wasCreated: boolean,
+            artist: Artist
+        }
+        var artists: Array<ArtistArray> = []
         /*var [primaryArtistCreated, primaryArtist] = await findCreateArtist(params.primary_artist)
         if (primaryArtistCreated) await primaryArtist.addSong(Song);*/
 
@@ -92,58 +111,55 @@ export async function addSongAndArtistToDatabase(params) {
 
 
         for (var i in params.primary_artists) {
-            let [artist, createdA] = await findCreateArtist(params.primary_artists[i])
-            if (createdA || !await artist.hasSong(Song)) {
-                logger.info(await artist.addSong(Song, { through: { isPrimaryArtist: true } }))
+            var result = await findCreateArtist(params.primary_artists[i])
+            if (result.wasCreated || !await result.artist.hasSong(Song)) {
+                logger.info(await result.artist.addSong(Song, { through: { isPrimaryArtist: true } } as any))
             }
-            artists.push({
-                wasCreated: createdA,
-                artist: artist
-            });
+            artists.push(result);
         }
         for (var i in params.featured_artists) {
-            let [artist, createdB] = await findCreateArtist(params.featured_artists[i])
-            if (createdB || !await artist.hasSong(Song)) {
+            let result = await findCreateArtist(params.featured_artists[i])
+            if (result.wasCreated || !await result.artist.hasSong(Song)) {
                 try {
-                    logger.info(await artist.addSong(Song, { through: { isPrimaryArtist: false } }))
+                    logger.info(await result.artist.addSong(Song, { through: { isPrimaryArtist: false } } as any))
                 } catch (e) {
                     database.fixSequelizeError(e)
                 }
 
             }
-            artists.push({
-                wasCreated: createdB,
-                artist: artist
-            });
+            artists.push(result);
         }
-        var album = null;
+        var album: Album | null = null; 
+        var albumCreated: boolean = false
         if (params.album != null) {
-            var [album, albumCreated] = await database.Album.findOrCreate({
+            [album,  albumCreated] = await database.Album.findOrCreate({
                 where: { geniusId: params.album.id },
                 defaults: {
                     geniusId: params.album.id,
                     title: params.album.name,
-                    releaseDate: Date.parse(params.album.release_date_for_display),
+                    releaseDate: new Date(params.album.release_date_for_display),
                     geniusURL: params.album.url,
                     meta: params
                 }
             })
 
             for (var i in params.album.primary_artists) {
-                let [artist, createdA] = await findCreateArtist(params.album.primary_artists[i])
-                if (createdA || !await artist.hasAlbum(album)) {
+                
+
+                var result = await findCreateArtist(params.album.primary_artists[i])
+                if (result.wasCreated || !(await result.artist.hasAlbum(album))) {
                     try {
-                        logger.info(await artist.addAlbum(album, { through: { isPrimaryArtist: false } }))
+                        logger.info(await result.artist.addAlbum(album, { through: { isPrimaryArtist: false } } as any))
                     } catch (e) {
                         database.fixSequelizeError(e)
                     }
                 }
             }
             for (var i in params.album.featured_artists) {
-                let [artist, createdB] = await findCreateArtist(params.album.featured_artists[i])
-                if (createdB || !await artist.hasAlbum(album)) {
+                let result = await findCreateArtist(params.album.featured_artists[i])
+                if (result.wasCreated || !await result.artist.hasAlbum(album)) {
                     try {
-                        logger.info(await artist.addAlbum(album, { through: { isPrimaryArtist: false } }))
+                        logger.info(await result.artist.addAlbum(album, { through: { isPrimaryArtist: false } } as any))
                     } catch (e) {
                         database.fixSequelizeError(e)
                     }

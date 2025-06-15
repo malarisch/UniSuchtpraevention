@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Button, TextArea, Table, TableHead, TableBody, TableRow, TableCell, H2, Text, Input } from '@adminjs/design-system'
 import { ApiClient } from 'adminjs'
-import loggerConstructor from '../modules/logger.mjs'
-const logger = loggerConstructor()
 
 const api = new ApiClient()
 

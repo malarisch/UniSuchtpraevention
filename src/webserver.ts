@@ -8,14 +8,17 @@ import * as AdminJSSequelize from '@adminjs/sequelize'
 
 import Arena from 'bull-arena';
 import { Queue, FlowProducer } from "bullmq";
-import express from 'express'
+import express from 'express';
 import 'dotenv/config'
-import * as database from './modules/database.mjs'
-import * as GeniusTool from './admin/GeniusToolPage.mjs'
-import {componentLoader, Components } from './admin/components.mjs'
-import * as UserResources from './admin/resources.mjs';
-import loggerConstructor from './modules/logger.mjs'
-const logger = loggerConstructor()
+import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './modules/index.ts'
+//@ts-ignore
+import * as GeniusTool from './admin/GeniusToolPage.ts' 
+//@ts-ignore
+import {componentLoader, Components } from './admin/components.ts'
+//@ts-ignore
+import * as UserResources from './admin/resources.ts';
+
+const logger = await loggerConstructor.logger()
 logger.debug("Script loaded")
 
 const PORT = process.env.PORT
@@ -26,6 +29,7 @@ AdminJS.registerAdapter({
 })
 
 const arena = Arena({
+    //@ts-ignore
   BullMQ: Queue,
   FlowBullMQ: FlowProducer,
     queues: [
@@ -33,14 +37,14 @@ const arena = Arena({
             type: "bullmq",
             name: "lyricsFetcher",
             hostId: "Webapp",
-            redis: {host: process.env.REDIS_HOST, port: process.env.REDIS_PORT}
+            redis: {host: process.env.REDIS_HOST, port: parseInt(process.env.REDIS_PORT as string)}
 
         },
         {
             type: "bullmq",
             name: "songFetcher",
             hostId: "Webapp",
-            redis: {host: process.env.REDIS_HOST, port: process.env.REDIS_PORT}
+            redis: {host: process.env.REDIS_HOST, port: parseInt(process.env.REDIS_PORT as string)}
         }
     ]
 })
@@ -53,7 +57,7 @@ const start = async () => {
     const app = express()
     await database.sync()
     const admin = new AdminJS({
-        resources: [database.Album, database.Artist, UserResources.SongsResource, database.substanceRating],
+        resources: [database.Album, database.Artist, UserResources.SongsResource, database.SubstanceRating],
         componentLoader,
         pages: {
             GeniusTool: GeniusTool.page

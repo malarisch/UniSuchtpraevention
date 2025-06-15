@@ -1,17 +1,17 @@
-import pino from 'pino';
-import { pinoLoki } from 'pino-loki';
 import dotenv from 'dotenv';
 dotenv.config();
 
+export async function logger(): Promise<import('pino').Logger> {
+    const pinoLoki = (await import('pino-loki')).default;
+    const pino = (await import('pino')).default;
 
+    const lokiUrl: string = process.env.LOKI_URL as string;
 
-export default function () {
     const stream = pinoLoki({
-        host: process.env.LOKI_URL,
+        host: lokiUrl,
         labels: { app: process.env.LOGGER_APP_NAME || 'unnamed' },
         interval: 5, // batch every 5 sec
         timeout: 10000,
-        basicAuth: process.env.LOKI_BASIC_AUTH,
         headers: process.env.LOKI_HEADERS ? {
             Authorization: process.env.LOKI_HEADERS.split('=')[1]
         } : undefined
@@ -21,5 +21,5 @@ export default function () {
         { level: process.env.LOG_LEVEL || 'info' },
         stream
     );
-    return logger
+    return logger;
 };

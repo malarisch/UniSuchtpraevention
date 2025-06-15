@@ -1,17 +1,18 @@
-import { addRatingToDb, rateLyrics } from '../modules/aiConnector.mjs';
-import * as database from '../modules/database.mjs'
-import * as lyricsFetcher from '../modules/lyricsFetcher.mjs'
-import loggerConstructor from '../modules/logger.mjs'
-const logger = loggerConstructor()
+import { addRatingToDb, rateLyrics } from '../modules/aiConnector.ts';
+import * as database from '../modules/database.ts'
+import * as lyricsFetcher from '../modules/lyricsFetcher.ts'
+import { logger as loggerConstructor} from '../modules/logger.ts'
+const logger = await loggerConstructor()
 
 
 
-async function hasAnalysis(response, request, context) {
+
+async function hasAnalysis(response: any, request: any, context: any) {
 
                     for (var i in context.records) {
-                        let song = await database.Song.findByPk(context.records[i].params.id, {include: database.substanceRating});
-                        //console.log(context.records[i].params)
-                        context.records[i].params.hasAnalysis = (song.substanceRatings.length > 0 ? true : false)
+                        let song = await database.Song.findByPk(context.records[i].params.id, {include: database.SubstanceRating});
+                        
+                        context.records[i].params.hasAnalysis = ((song?.SubstanceRatings as database.SubstanceRating[]).length > 0 ? true : false)
                         context.records[i].params.hasLyrics = (context.records[i].params.lyrics == null ? false : true)
                     }
                     
@@ -25,7 +26,7 @@ export const SongsResource = {
             fetchLyrics: {
                 actionType: 'record',
                 component: false,
-                handler: async (request, response, context) => {
+                handler: async (reques: any, response: any, context: any) => {
                     const { record } = context;
                     if (!record) {
                         throw new Error('Kein Datensatz gefunden');
@@ -52,7 +53,7 @@ export const SongsResource = {
             aiAnalysis: {
                 actionType: "record",
                 component: false,
-                handler: async (request, response, context) => {
+                handler: async (request: any, response: any, context: any) => {
                     const { record } = context;
                     if (!record) {
                         throw new Error('Kein Datensatz gefunden');

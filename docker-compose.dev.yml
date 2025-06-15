@@ -2,7 +2,7 @@ services:
   app:
     build: .
     container_name: webserver
-    command: ["npx", "nodemon", "--inspect=0.0.0.0:9229", "src/webserver.js"]
+    command: "npx nodemon --inspect=0.0.0.0:9229 --exec \" node --inspect=0.0.0.0:9229 --loader=ts-node/esm\" src/webserver.ts"
     ports:
       - "8080:8080"   # Web-Interface (AdminJS etc.)
       - "9229:9229"   # Debug-Port für App
@@ -25,7 +25,7 @@ services:
   worker:
     build: .
     container_name: node-worker
-    command: ["npx", "nodemon", "--inspect=0.0.0.0:9229", "src/worker.mjs"]
+    command: "npx nodemon --inspect=0.0.0.0:9229 --exec \" node --inspect=0.0.0.0:9229 --loader=ts-node/esm\" src/webserver.ts"
     ports:
       - "9230:9229"  # Debug-Port für Worker (gemappt auf anderen Host-Port)
     environment:
