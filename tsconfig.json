@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "esModuleInterop": true,
+    "outDir": "./dist",
+    "strict": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*"]
+}
