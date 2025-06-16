@@ -14,13 +14,14 @@ services:
       PG_PASSWORD: ${PG_PASSWORD}
       PG_DB: ${PG_DB}
       LOGGER_APP_NAME: "webserver"
-    depends_on:
-      - redis
-      - postgres
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+    
     volumes:
       - .:/app
       - /app/node_modules
     restart: unless-stopped
+    networks:
+      - meteringBridge
 
   worker:
     build: .
@@ -36,72 +37,14 @@ services:
       PG_PASSWORD: ${PG_PASSWORD}
       PG_DB: ${PG_DB}
       LOGGER_APP_NAME: "worker"
-    depends_on:
-      - redis
-      - postgres
     volumes:
       - .:/app
       - /app/node_modules
     restart: unless-stopped
+    networks:
+      - meteringBridge
 
-  redis:
-    image: redis:7
-    container_name: local-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-
-  postgres:
-    image: postgres:17
-    container_name: local-postgres
-    environment:
-      POSTGRES_USER: ${PG_USER}
-      POSTGRES_PASSWORD: ${PG_PASSWORD}
-      POSTGRES_DB: ${PG_DB}
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./services/postgres:/var/lib/postgresql/data
-  loki:
-    image: grafana/loki:latest
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-  prometheus:
-    image: prom/prometheus:latest
-    ports:
-      - 9090:9090
-  grafana:
-    environment:
-      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      - GF_FEATURE_TOGGLES_ENABLE=alertingSimplifiedRouting,alertingQueryAndExpressionsStepMode
-    entrypoint:
-      - sh
-      - -euc
-      - |
-        mkdir -p /etc/grafana/provisioning/datasources
-        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
-        apiVersion: 1
-        datasources:
-        - name: Loki
-          type: loki
-          access: proxy 
-          orgId: 1
-          url: http://loki:3100
-          basicAuth: false
-          isDefault: true
-          version: 1
-          editable: false
-        EOF
-        /run.sh
-    image: grafana/grafana:latest
-    volumes:
-      - ./services/grafana:/var/lib/grafana
-    ports:
-      - "3000:3000"
-
-volumes:
-  redis-data:
+networks:
+  meteringBridge:
+    external: true
+    

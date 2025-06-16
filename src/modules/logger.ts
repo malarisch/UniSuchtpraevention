@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
+import { InfluxDBClient, Point } from '@influxdata/influxdb3-client';
 
 export async function logger(): Promise<import('pino').Logger> {
     const pinoLoki = (await import('pino-loki')).default;
@@ -23,3 +24,29 @@ export async function logger(): Promise<import('pino').Logger> {
     );
     return logger;
 };
+
+var localLogger = await logger()
+    const influxHost: string = process.env.INFLUXDB_HOST ?? ''
+    const influxDatabase: string = process.env.INFLUXDB_DATABASE ?? ''
+    const influxToken: string  = process.env.INFLUXDB_TOKEN ?? ''
+export const influxClient = new InfluxDBClient({host: influxHost, token: influxToken, database: influxDatabase})
+
+export async function writeInflux(points: Point[]) {
+    try {
+        await influxClient.write(points, influxDatabase);
+        localLogger.info("Write Data Points")
+    } catch (e) {
+        localLogger.error(e)
+    }
+}
+
+export async function exportTaskTime(taskName: string, duration: number) {
+    try {
+        await writeInflux([Point.measurement("taskTime").setTag("taskName", taskName).setTag('unit', "milliseconds").setFloatField("duration", duration).setTimestamp(new Date())], )    
+    } catch (e) {
+        localLogger.error(e)
+        return e;
+    }
+    
+
+}

@@ -15,6 +15,7 @@ import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";
 import * as fs from 'node:fs/promises'
 import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './index.ts'
+import { Point } from '@influxdata/influxdb3-client';
 console.log(loggerConstructor)
 const logger = await loggerConstructor.logger();
 /**
@@ -66,6 +67,8 @@ type substancesSchema = {
  * @returns {Promise<Substances>} Parsed result from the AI
  */
 export async function rateLyrics(lyrics: string) {
+    const startTime = Date.now()
+    try {
     logger.info(lyrics)
     const response = await openai.responses.parse({
         model: "gpt-4o",
@@ -80,9 +83,20 @@ export async function rateLyrics(lyrics: string) {
             format: zodTextFormat(substancesSchema, "substance_rating_schema"),
         },
     });
-
+    const p = Point.measurement("aiAnalysis").setTag('sysPromptVer', String(sysPromptVer))
+        .setIntegerField("inputTokens", response.usage?.input_tokens)
+        .setIntegerField('outputTokens', response.usage?.output_tokens)
+        .setIntegerField('totalTokens', response.usage?.total_tokens)
+        .setTimestamp(new Date())
+    await loggerConstructor.writeInflux([p])
     logger.info(response.output_parsed);
     return response.output_parsed as substancesSchema;
+} catch (e) {
+    throw e;
+} finally {
+    loggerConstructor.exportTaskTime("aiAnalysis", (Date.now() - startTime))
+
+}
 }
 
 /**
@@ -92,6 +106,7 @@ export async function rateLyrics(lyrics: string) {
  * @returns {Promise<void>}
  */
 export async function addRatingToDb(ratings: substancesSchema, songId: number) {
+    const startTime = Date.now()
     try {
     for (const element of ratings.substances) {
         element.songId = songId
@@ -101,5 +116,8 @@ export async function addRatingToDb(ratings: substancesSchema, songId: number) {
     };
 } catch (e) {
     database.fixSequelizeError(e)
+} finally {
+    loggerConstructor.exportTaskTime("addRatingToDb", (Date.now() - startTime))
+
 }
 }

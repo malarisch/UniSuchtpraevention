@@ -27,6 +27,7 @@ export const GeniusClient = new Genius.Client(process.env.GENIUS_CLIENT_ACCESS_T
  * @returns {Promise<any[]>} Array of search hits from Genius
  */
 export async function searchSong(songName: string) {
+    const startTime = Date.now()
     logger.info("Searching Song: ", songName)
     let searchRequest = await axiosInstance.get("/search", {
         params: {
@@ -34,6 +35,8 @@ export async function searchSong(songName: string) {
         }
     });
     logger.info("Found %d hits", searchRequest.data.response.hits.length)
+    const duration = (Date.now() - startTime)
+    loggerConstructor.exportTaskTime("searchSong", duration)
     return searchRequest.data.response.hits
 }
 /**
@@ -42,6 +45,7 @@ export async function searchSong(songName: string) {
  * @returns {Promise<any>} Song details
  */
 export async function getSong(id: number | string) {
+    const startTime = Date.now()
     if (typeof id == "number") {
         id = String(id)
     }
@@ -50,6 +54,7 @@ export async function getSong(id: number | string) {
             text_format: "plain"
         }
     })
+    loggerConstructor.exportTaskTime("getSong", (Date.now() - startTime))
     return song.data.response.song;
 }
 /**
@@ -59,6 +64,7 @@ export async function getSong(id: number | string) {
  * @returns {Promise<object|undefined>} Details about created records
  */
 export async function addSongAndArtistToDatabase(params: any) {
+    const startTime = Date.now()
     try {
         let DateObj: Date = new Date(params.release_date_for_display)
 
@@ -182,6 +188,9 @@ export async function addSongAndArtistToDatabase(params: any) {
         };
     } catch (e) {
         database.fixSequelizeError(e)
+    } finally {
+        loggerConstructor.exportTaskTime("addSongAndArtistToDatabase", (Date.now() - startTime))
+
     }
 
 }

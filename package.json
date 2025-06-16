@@ -29,6 +29,7 @@
   "dependencies": {
     "@adminjs/express": "^6.1.1",
     "@adminjs/sequelize": "^4.1.1",
+    "@influxdata/influxdb3-client": "^1.1.0",
     "@sequelize/postgres": "^7.0.0-alpha.46",
     "axios": "^1.9.0",
     "bull-arena": "^4.5.1",
@@ -45,7 +46,6 @@
     "pino-loki": "^2.6.0",
     "sequelize": "^6.37.7",
     "tsconfig-paths": "^4.2.0",
-    "vite-node": "^3.2.3",
     "zod": "^3.25.57"
   },
   "devDependencies": {

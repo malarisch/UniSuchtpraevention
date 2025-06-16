@@ -17,10 +17,16 @@ const logger = await loggerConstructor.logger()
 
 
 async function getHTML(url: string) {
+    const startTime = Date.now()
+    try {
 
     let content = await axios.get(url)
     fs.writeFileSync("htmlout.html", content.data)
     return content
+    } finally {
+        loggerConstructor.exportTaskTime("getHTML", (Date.now() - startTime))
+
+    }
 }
 export class NoResultError extends Error {
     constructor() {
@@ -35,6 +41,8 @@ export class NoResultError extends Error {
  * @throws {NoResultError} if no lyrics are present in the markup
  */
 async function parseHTML(html: string) {
+    const startTime = Date.now()
+    try {
     let document = htmlParser(html)
     const lyricsRoot = document.getElementById("lyrics-root")
     
@@ -59,6 +67,13 @@ async function parseHTML(html: string) {
         throw new NoResultError();
     }
     return lyrics
+} catch (e) {
+    logger.error(e)
+    throw e
+} finally {
+    loggerConstructor.exportTaskTime("parseHTML", (Date.now() - startTime))
+
+}
 }
 
 /**
