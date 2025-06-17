@@ -55,7 +55,9 @@ class Song extends Model<InferAttributes<Song>, InferCreationAttributes<Song>> {
   declare geniusId: number;
   declare geniusURL: string;
   declare SubstanceRatings?: NonAttribute<SubstanceRating[]>
-  declare SubstanceMentions?: number | null
+  declare mentions: number | null
+  declare intensity_bin: string
+  Artists?: NonAttribute<Artist[]> 
 }
 Song.init({
   id: {
@@ -71,9 +73,13 @@ Song.init({
   meta: DataTypes.JSONB,
   geniusId: DataTypes.INTEGER,
   geniusURL: DataTypes.STRING(512),
-  SubstanceMentions: {
-    type: DataTypes.INET
-  }
+  mentions: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  intensity_bin: DataTypes.STRING
+  
+
 }, { sequelize, modelName: 'song' });
 
 class Album extends Model<InferAttributes<Album>, InferCreationAttributes<Album>> {
@@ -153,7 +159,7 @@ Song.belongsTo(Album);
 
 export async function sync(): Promise<void> {
   await sequelize.sync({
-    alter: false,
+    alter: true,
     logging: false
   });
 }
