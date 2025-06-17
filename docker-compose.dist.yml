@@ -1,0 +1,50 @@
+services:
+  app:
+    build: .
+    container_name: webserver
+    command: "node --inspect=0.0.0.0:9229 --import @swc-node/register/esm-register --enable-source-maps dist/webserver.js"
+    ports:
+      - "8080:8080"   # Web-Interface (AdminJS etc.)
+      - "9229:9229"   # Debug-Port für App
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      PG_HOST: ${PG_HOST}
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
+      PG_DB: ${PG_DB}
+      LOGGER_APP_NAME: "webserver"
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+    
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - meteringBridge
+
+  worker:
+    build: .
+    container_name: node-worker
+    command: "node --inspect=0.0.0.0:9229 --import @swc-node/register/esm-register --enable-source-maps dist/worker.js"
+    ports:
+      - "9230:9229"  # Debug-Port für Worker (gemappt auf anderen Host-Port)
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      PG_HOST: ${PG_HOST}
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
+      PG_DB: ${PG_DB}
+      LOGGER_APP_NAME: "worker"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - meteringBridge
+
+networks:
+  meteringBridge:
+    external: true
+    
