@@ -6,9 +6,9 @@
 import axios from 'axios';
 import 'dotenv/config'
 import Genius, { ArtistsClient } from 'genius-lyrics';
-import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './index.ts'
+import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './index'
 import { CreationOptional, InferAttributes, InferCreationAttributes } from 'sequelize';
-import { Album, Artist } from './database.ts';
+import { Album, Artist } from '@suchtModules/database';
 
 const logger = await loggerConstructor.logger()
 
@@ -28,7 +28,7 @@ export const GeniusClient = new Genius.Client(process.env.GENIUS_CLIENT_ACCESS_T
  */
 export async function searchSong(songName: string) {
     const startTime = Date.now()
-    logger.info("Searching Song: ", songName)
+    logger.info("Searching Song: " + songName)
     let searchRequest = await axiosInstance.get("/search", {
         params: {
             "q": songName
@@ -45,6 +45,7 @@ export async function searchSong(songName: string) {
  * @returns {Promise<any>} Song details
  */
 export async function getSong(id: number | string) {
+    logger.info("Loading Song from Genius: " + id)
     const startTime = Date.now()
     if (typeof id == "number") {
         id = String(id)
@@ -120,7 +121,8 @@ export async function addSongAndArtistToDatabase(params: any) {
         for (var i in params.primary_artists) {
             var result = await findCreateArtist(params.primary_artists[i])
             if (result.wasCreated || !await result.artist.hasSong(Song)) {
-                logger.info(await result.artist.addSong(Song, { through: { isPrimaryArtist: true } } as any))
+                await result.artist.addSong(Song, { through: { isPrimaryArtist: true } } as any)
+                logger.info("Added Song " + Song.title + " to Primary Artist "+result.artist.name)
             }
             artists.push(result);
         }
@@ -128,7 +130,8 @@ export async function addSongAndArtistToDatabase(params: any) {
             let result = await findCreateArtist(params.featured_artists[i])
             if (result.wasCreated || !await result.artist.hasSong(Song)) {
                 try {
-                    logger.info(await result.artist.addSong(Song, { through: { isPrimaryArtist: false } } as any))
+                    await result.artist.addSong(Song, { through: { isPrimaryArtist: false } } as any)
+                    logger.info("Added Song " + Song.title + " to Featured Artist "+result.artist.name)
                 } catch (e) {
                     database.fixSequelizeError(e)
                 }
@@ -156,7 +159,8 @@ export async function addSongAndArtistToDatabase(params: any) {
                 var result = await findCreateArtist(params.album.primary_artists[i])
                 if (result.wasCreated || !(await result.artist.hasAlbum(album))) {
                     try {
-                        logger.info(await result.artist.addAlbum(album, { through: { isPrimaryArtist: false } } as any))
+                        logger.debug(await result.artist.addAlbum(album, { through: { isPrimaryArtist: false } } as any))
+                        logger.info("Added Album " + album.title + " to Primary Artist "+result.artist.name)
                     } catch (e) {
                         database.fixSequelizeError(e)
                     }
@@ -166,7 +170,8 @@ export async function addSongAndArtistToDatabase(params: any) {
                 let result = await findCreateArtist(params.album.featured_artists[i])
                 if (result.wasCreated || !await result.artist.hasAlbum(album)) {
                     try {
-                        logger.info(await result.artist.addAlbum(album, { through: { isPrimaryArtist: false } } as any))
+                        logger.debug(await result.artist.addAlbum(album, { through: { isPrimaryArtist: false } } as any))
+                        logger.info("Added Album " + album.title + " to Featured Artist "+result.artist.name)
                     } catch (e) {
                         database.fixSequelizeError(e)
                     }

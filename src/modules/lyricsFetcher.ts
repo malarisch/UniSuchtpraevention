@@ -5,8 +5,7 @@
 import axios from 'axios';
 import 'dotenv/config'
 import { parse as htmlParser } from 'node-html-parser'
-import * as fs from 'node:fs';
-import { lyricsFetcher, database, logger as loggerConstructor } from './index.ts'
+import { lyricsFetcher, database, logger as loggerConstructor } from './index'
 const logger = await loggerConstructor.logger()
 /**
  * Download the HTML content of the given URL.
@@ -18,10 +17,10 @@ const logger = await loggerConstructor.logger()
 
 async function getHTML(url: string) {
     const startTime = Date.now()
+    logger.info("Fetching "+url)
     try {
 
     let content = await axios.get(url)
-    fs.writeFileSync("htmlout.html", content.data)
     return content
     } finally {
         loggerConstructor.exportTaskTime("getHTML", (Date.now() - startTime))

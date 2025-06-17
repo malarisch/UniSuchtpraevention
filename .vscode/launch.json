@@ -5,6 +5,28 @@
     "version": "0.2.0",
     "configurations": [
         
+
+        {
+            "name": "Launch jsonImporter",
+            
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "runtimeExecutable": "node",
+            "type": "node",
+            "args": ["--loader", "ts-node/esm", "-r", "@swc-node/register", "./src/tools/jsonImporter.ts", "scrape.json"]
+
+        },
+        
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Run nodemon",
+            "runtimeExecutable": "nodemon",
+            "cwd": "${workspaceFolder}/tools",
+            "args": ["./tools/chartScraper.js"]
+        },
         {
             "type": "node",
             "request": "launch",

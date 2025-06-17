@@ -1,7 +1,7 @@
-import { addRatingToDb, rateLyrics } from '../modules/aiConnector.ts';
-import * as database from '../modules/database.ts'
-import * as lyricsFetcher from '../modules/lyricsFetcher.ts'
-import { logger as loggerConstructor} from '../modules/logger.ts'
+import { addRatingToDb, rateLyrics } from '../modules/aiConnector';
+import * as database from '../modules/database'
+import * as lyricsFetcher from '../modules/lyricsFetcher'
+import { logger as loggerConstructor} from '../modules/logger'
 const logger = await loggerConstructor()
 
 

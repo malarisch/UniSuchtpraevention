@@ -6,12 +6,13 @@ import {
   Sequelize, InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute, ForeignKey,
 } from 'sequelize';
 import 'dotenv/config'
-import {logger as loggerConstructor} from './logger.ts'
+import {logger as loggerConstructor} from './logger'
 const logger = loggerConstructor()
 
 const sequelize = new Sequelize(process.env.PG_DB as string, process.env.PG_USER as string, process.env.PG_PASSWORD as string, {
   host: process.env.PG_HOST,
-  dialect: 'postgres'
+  dialect: 'postgres',
+  logging: false
 });
 
 
@@ -148,7 +149,8 @@ Song.belongsTo(Album);
 
 export async function sync(): Promise<void> {
   await sequelize.sync({
-    alter: true
+    alter: false,
+    logging: false
   });
 }
 

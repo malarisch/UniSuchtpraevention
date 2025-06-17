@@ -10,14 +10,14 @@ import Arena from 'bull-arena';
 import { Queue, FlowProducer } from "bullmq";
 import express from 'express';
 import 'dotenv/config'
-import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './modules/index.ts'
+import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from '@suchtModules/index'
 
-import * as GeniusTool from './admin/GeniusToolPage.ts' 
-import * as ArenaTool from "./admin/ArenaToolPage.ts"
+import * as GeniusTool from './admin/GeniusToolPage' 
+import * as ArenaTool from "./admin/ArenaToolPage"
 
-import {componentLoader, Components } from './admin/components.ts'
+import {componentLoader, Components } from './admin/components'
 
-import * as UserResources from './admin/resources.ts';
+import * as UserResources from './admin/resources';
 
 const logger = await loggerConstructor.logger()
 logger.debug("Script loaded")

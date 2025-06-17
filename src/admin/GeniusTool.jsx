@@ -35,7 +35,8 @@ const GeniusTool = () => {
             {row.result.release_date_with_abbreviated_month_for_display}
           </TableCell>
           <TableCell>
-            <Button mt="lg" onClick={(e) => handleAdd(row.result.id)}>Hinzufügen</Button>
+            <Button mt="lg" onClick={(e) => handleAdd(row.result.id)}>Hinzufügen</Button> <br/>
+            <Button mt="lg" onClick={(e) => startChain(row.result.id)}>Start Job Chain</Button>
           </TableCell>
         </TableRow>
       )
@@ -54,6 +55,16 @@ const GeniusTool = () => {
     })
     setDataOutput(response.data.message);
 
+  }
+  const startChain = async (id) => {
+    const response = await api.getPage({
+      method: "post",
+      pageName: 'GeniusTool',
+      data: {
+        type: "startChain",
+        songId: id
+      }
+    })
   }
 
   return (

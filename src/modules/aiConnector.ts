@@ -14,9 +14,8 @@ import OpenAI from 'openai'
 import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";
 import * as fs from 'node:fs/promises'
-import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './index.ts'
+import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './index'
 import { Point } from '@influxdata/influxdb3-client';
-console.log(loggerConstructor)
 const logger = await loggerConstructor.logger();
 /**
  * @typedef {Object} SongAnalysis
@@ -83,7 +82,7 @@ export async function rateLyrics(lyrics: string) {
             format: zodTextFormat(substancesSchema, "substance_rating_schema"),
         },
     });
-    const p = Point.measurement("aiAnalysis").setTag('sysPromptVer', String(sysPromptVer))
+    const p = Point.measurement("aiAnalysis").setTag('sysPromptVer', String(sysPromptVer)).setStringField("model", "gpt-4o")
         .setIntegerField("inputTokens", response.usage?.input_tokens)
         .setIntegerField('outputTokens', response.usage?.output_tokens)
         .setIntegerField('totalTokens', response.usage?.total_tokens)

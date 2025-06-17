@@ -1,10 +1,12 @@
 import 'dotenv/config'
-import {logger as loggerConstructor} from '../modules/logger.ts'
+import {logger as loggerConstructor} from '../modules/logger'
+
+import {Queues} from '../modules/index'
 
 const logger = await loggerConstructor()
 
-import * as GeniusFetcher from '../modules/geniusFetcher.ts'
-import { componentLoader, Components } from './components.ts'
+import * as GeniusFetcher from '../modules/geniusFetcher'
+import { componentLoader, Components } from './components'
 
 export async function testGenius(inputText: string) {
   let result = await GeniusFetcher.GeniusClient.songs.search(inputText)
@@ -29,6 +31,17 @@ export const page = {
           await GeniusFetcher.getSong(request.payload.songId)
         )
       }
+    } else if (request.payload.type == "startChain") {
+        let job = await Queues.QueueList.songFetcherQueue.add(Queues.songFetcherQueueName, {
+          songId: request.payload.songId,
+          chain: true
+        })
+        logger.info("Created Job " + job.id + " for geniusID: " + request.payload.songId)
+        return {
+          type: "startChain",
+          message: "Started Job: " + job.id,
+          job: JSON.stringify(job)
+        }
     }
   }
 }

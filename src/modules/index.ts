@@ -1,10 +1,12 @@
 
 
-export * as aiConnector from './aiConnector.ts'
+export * as aiConnector from './aiConnector'
 
-export * as database from './database.ts'
-export * as logger from './logger.ts'
+export * as database from './database'
+export * as logger from './logger'
 
-export * as geniusFetcher from './geniusFetcher.ts'
+export * as geniusFetcher from './geniusFetcher'
 
-export * as lyricsFetcher from './lyricsFetcher.ts'
+export * as lyricsFetcher from './lyricsFetcher'
+export * as Queues from './queues'
+export * as ollamaConnector from './ollamaConnector'
