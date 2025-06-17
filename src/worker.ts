@@ -97,7 +97,7 @@ const lyricsFetcherQueue = new Worker(
     }
     let lyrics = await lyricsFetcher.lyricsFromURL(job.data.geniusURL)
     
-    await song.update({ lyrics: lyrics })
+    console.log(await song.update({ lyrics: lyrics }))
     logger.info("Added Lyrics to " + song.title + " with length " + lyrics.length)
     if (chain && lyrics.length > 0 && chainAiAnalysis) {
         await Queues.QueueList.aiAnalysisQueue.add(job.name, {

@@ -55,6 +55,7 @@ class Song extends Model<InferAttributes<Song>, InferCreationAttributes<Song>> {
   declare geniusId: number;
   declare geniusURL: string;
   declare SubstanceRatings?: NonAttribute<SubstanceRating[]>
+  declare SubstanceMentions?: number | null
 }
 Song.init({
   id: {
@@ -69,7 +70,10 @@ Song.init({
   lyricsState: DataTypes.STRING,
   meta: DataTypes.JSONB,
   geniusId: DataTypes.INTEGER,
-  geniusURL: DataTypes.STRING(512)
+  geniusURL: DataTypes.STRING(512),
+  SubstanceMentions: {
+    type: DataTypes.INET
+  }
 }, { sequelize, modelName: 'song' });
 
 class Album extends Model<InferAttributes<Album>, InferCreationAttributes<Album>> {
