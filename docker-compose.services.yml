@@ -87,11 +87,14 @@ services:
           editable: false
         - name: InfluxDB
           type: influxdb
+          jsonData:
+            version: SQL
+            dbName: ${INFLUXDB_DATABASE}
+            httpMode: POST
+            insecureGrpc: true
           access: proxy
-          database: db0
-          user: ${INFLUXDB_USERNAME}
-          password: ${INFLUXDB_PASSWORD}
-          token: ${INFLUXDB_TOKEN}
+          secureJsonData:
+            token: ${INFLUXDB_TOKEN}
           url: http://influxdb:8181
           editable: true
 

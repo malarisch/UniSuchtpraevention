@@ -141,3 +141,4 @@ dist
 htmlout.html
 
 services/*
+.VSCODE*
