@@ -54,10 +54,10 @@ class Song extends Model<InferAttributes<Song>, InferCreationAttributes<Song>> {
   declare meta: object | null;
   declare geniusId: number;
   declare geniusURL: string;
-  declare SubstanceRatings?: NonAttribute<SubstanceRating[]>
-  declare mentions: number | null
-  declare intensity_bin: string
-  Artists?: NonAttribute<Artist[]> 
+  declare SubstanceRatings?: NonAttribute<SubstanceRating[]>;
+  declare mentions: number | null;
+  declare intensity_bin: string | null
+  artists?: NonAttribute<Artist[]> 
 }
 Song.init({
   id: {
