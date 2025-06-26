@@ -1,5 +1,7 @@
 # UniSuchtprävention
 
+[![wakatime](https://wakatime.com/badge/github/malarisch/UniSuchtpraevention.svg)](https://wakatime.com/badge/github/malarisch/UniSuchtpraevention) [![Docker Image CI](https://github.com/malarisch/UniSuchtpraevention/actions/workflows/docker-image.yml/badge.svg)](https://github.com/malarisch/UniSuchtpraevention/actions/workflows/docker-image.yml)
+
 Dieses Projekt analysiert Songtexte und speichert die Ergebnisse in einer Datenbank. Die Anwendung basiert auf Node.js/TypeScript und nutzt Postgres, Redis und verschiedene Monitoring‑Tools.
 
 ## Voraussetzungen
