@@ -146,7 +146,11 @@ Danach wird das folgende Schema für jede gefundene Substanz abgearbeitet. Die S
 
 # Beispielhafte Liste von Substanzen und Szenebegriffen
 _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hilfetelefonnummern liefern. Alle Begriffe sind in der freien Wildbahn gefunden worden, so rassistisch und misogyn sie auch sein mögen._
-- ### Stimulanzien
+ - ### Stimulanzien
+     - Ziehen
+     - Sniffen
+     - Schnupfen
+     - Knallen
     - #### Amphetamin
         - Pep
         - Pepp
@@ -166,15 +170,16 @@ _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hil
     - #### Kokain u. Crack
         - Koks
         - Coke
-        - Schnee / Schneeweiß
+        - Schnee
+        - Schneeweiß
         - Blow
         - White Girl
         - Perico
         - Mokki
         - C
-        - Steine (Crack)
+        - Steine
         - Bubble
-        - Königsmischung (Koks + Speed)
+        - Königsmischung
     - #### Mephedron / 3-MMC u. a. Cathinone
         - Meow Meow
         - M-Cat
@@ -191,7 +196,14 @@ _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hil
         - Medikinet
         - Rita
 
-- ### Empathogene u. Entactogene
+ - ### Empathogene u. Entactogene
+     - Schmeißen
+     - Werfen
+     - Poppen
+     - Schlucken
+     - Fressen
+     - Naschen
+     - Dippen
     - #### MDMA
         - Ecstasy
         - Teile
@@ -219,13 +231,16 @@ _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hil
     - #### Benzodiazepine
         - Xanax
         - Alprazolam
-        - Xan / Xans
+        - Xan
+        - Xans
         - Xannies
-        - Bars / Footballs / Z-Bars
+        - Bars
+        - Z-Bars
         - Blues
         - Tafil
         - Flunnis
-        - Ropies / Ropse
+        - Ropies
+        - Ropse
     - #### Designer-Benzos (Flualprazolam u. a.)
         - Flualp
         - Fluapex
@@ -240,11 +255,17 @@ _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hil
         - Soap
         - Seife
 
-- ### Opioide
+ - ### Opioide
+     - Ballern
+     - Drücken
+     - Spritzen
+     - Hauen
+     - Boofen
     - #### Heroin
         - H
         - Gear
-        - Brown / Braun / Brown Sugar
+        - Brown
+        - Brown Sugar
         - Smack
         - Stoff
         - Shore
@@ -252,7 +273,8 @@ _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hil
         - Fenty
         - Apache
         - Dance Fever
-        - China Town / China Girl
+        - China Town
+        - China Girl
         - M30
         - Murder 8
         - Tango & Cash
@@ -262,7 +284,8 @@ _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hil
         - C-Fent
         - Green Heckler
     - #### Nitazene-Derivate
-        - Frankenstein-Pillen / -Pills
+        - Frankenstein-Pillen
+        - Frankenstein-Pills
         - Frankies
         - ISO
     - #### Tilidin
@@ -278,15 +301,18 @@ _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hil
         - Sizzurp
         - Hustensaft
         - Dirty Sprite
-        - Wok / Wock
-        - Syrup / Drank / Barre
+        - Wok
+        - Wock
+        - Syrup
+        - Drank
+        - Barre
         - Texas Tea
         - Memphis Mud
 
-- ### Halluzinogene
+ - ### Halluzinogene
     - #### LSD
         - Acid
-        - Pappe (Auch: MDMA)
+        - Pappe
         - Ticket
         - Zettel
         - Trips
@@ -332,7 +358,14 @@ _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hil
         - Skittles
         - Triple-C
 
-- ### Cannabinoide
+ - ### Cannabinoide
+     - Kiffen
+     - Rauchen
+     - Vapen
+     - Dampfen
+     - Drehen
+     - Dabben
+     - High
     - #### THC-haltiger Cannabis
         - Weed
         - Gras
@@ -350,7 +383,10 @@ _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hil
         - Skunk
         - Popcorn
         - Brokkoli
-        - Joint-Synonyme: Dübel, Tüte, Lunte, Sportzigarette
+        - Dübel
+        - Tüte
+        - Lunte
+        - Sportzigarette
         - Blunt
     - #### Haschisch
         - Piece
@@ -383,7 +419,73 @@ _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hil
     - #### Lösungsmittel (Butan u. a.)
         - Sniff
         - Glue
-        - Gas  
+        - Gas
+ - ### Alkohol
+     - Saufen
+     - Trinken
+    - #### Bier
+        - Bier
+        - Pils
+        - Pilsener
+        - Helles
+        - Lager
+        - Weizen
+        - Weißbier
+        - Hopfenkaltschale
+        - Gerstensaft
+        - Bierchen
+        - Blondes
+        - Kaltgetränk
+        - Stiefel
+        - Büchse
+    - #### Wein
+        - Wein
+        - Vino
+        - Rotwein
+        - Weißwein
+        - Rosé
+        - Weinschorle
+        - Schoppen
+        - Rebensaft
+        - Roten
+        - Weißen
+        - Traubensaft
+    - #### Spirituosen
+        - Wodka
+        - Vodka
+        - Voddi
+        - Korn
+        - Gin
+        - Rum
+        - Whisky
+        - Whiskey
+        - Tequila
+        - Likör
+        - Jägermeister
+        - Hennessy
+        - Jacky
+        - Captain
+        - Bacardi
+        - Schnaps
+        - Kurzer
+        - Shot
+        - Harter
+        - Klopfer
+        - Feigling
+    - #### Alkopops & Mischgetränke
+        - Smirnoff Ice
+        - Bacardi Breezer
+        - Hooch
+        - U-Boot
+        - Limo-Mix
+        - Radler
+        - Mixery
+        - Alster
+        - Diesel
+        - V+ Curuba
+        - RTD
+        - Mischi
+        - Mische
 # Appendix: Gewichtungen und Gesamtscore
 Das Folgende muss auf keinen Fall berechnet werden! Dient nur zur internen Dokumentation!
 ## Start-Gewichtung:
