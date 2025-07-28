@@ -1,0 +1,538 @@
+{
+  "version": 1.0,
+  "substances": [
+    {
+      "category": "Stimulanzien",
+      "verbs": [
+        "Ziehen",
+        "Sniffen",
+        "Schnupfen",
+        "Knallen"
+      ],
+      "subcategories": [
+        {
+          "name": "Amphetamin",
+          "terms": [
+            "Pep",
+            "Pepp",
+            "Peppe",
+            "Speed",
+            "Schneller Peter",
+            "Schnelles",
+            "Bambinos",
+            "Uppers"
+          ]
+        },
+        {
+          "name": "Methamphetamin",
+          "terms": [
+            "Crystal",
+            "Tina",
+            "Ice / ICE",
+            "Pervitin",
+            "Yaba",
+            "Shards"
+          ]
+        },
+        {
+          "name": "Kokain u. Crack",
+          "terms": [
+            "Koks",
+            "Coke",
+            "Schnee",
+            "Schneeweiß",
+            "Blow",
+            "White Girl",
+            "Perico",
+            "Mokki",
+            "C",
+            "Steine",
+            "Bubble",
+            "Königsmischung"
+          ]
+        },
+        {
+          "name": "Mephedron / 3-MMC u. a. Cathinone",
+          "terms": [
+            "Meow Meow",
+            "M-Cat",
+            "Drone",
+            "Bubble"
+          ]
+        },
+        {
+          "name": "MDPV / α-PVP",
+          "terms": [
+            "Monkey Dust",
+            "Flakka",
+            "Zombie"
+          ]
+        },
+        {
+          "name": "Methylphenidat",
+          "terms": [
+            "Rits",
+            "Kiddie-Coke",
+            "Smarties",
+            "Medikinet",
+            "Rita"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Empathogene u. Entactogene",
+      "verbs": [
+        "Schmeißen",
+        "Werfen",
+        "Poppen",
+        "Schlucken",
+        "Fressen",
+        "Naschen",
+        "Dippen"
+      ],
+      "subcategories": [
+        {
+          "name": "MDMA",
+          "terms": [
+            "Ecstasy",
+            "Teile",
+            "E-Teile",
+            "XTC",
+            "Molly",
+            "Emma",
+            "E",
+            "Disco-Biscuits",
+            "Eckies",
+            "Kristalle",
+            "Pills",
+            "Dinger",
+            "Pappen"
+          ]
+        },
+        {
+          "name": "MDA / MDEA",
+          "terms": [
+            "Sassafras",
+            "Love-Pills"
+          ]
+        },
+        {
+          "name": "2C-B",
+          "terms": [
+            "Nexus",
+            "Toonies",
+            "Pink Playboy",
+            "TucTuc"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Sedativa u. Depressiva",
+      "verbs": [],
+      "subcategories": [
+        {
+          "name": "Benzodiazepine",
+          "terms": [
+            "Xanax",
+            "Alprazolam",
+            "Xan",
+            "Xans",
+            "Xannies",
+            "Bars",
+            "Z-Bars",
+            "Blues",
+            "Tafil",
+            "Flunnis",
+            "Ropies",
+            "Ropse"
+          ]
+        },
+        {
+          "name": "Designer-Benzos (Flualprazolam u. a.)",
+          "terms": [
+            "Flualp",
+            "Fluapex",
+            "Liquid Xan"
+          ]
+        },
+        {
+          "name": "GHB / GBL",
+          "terms": [
+            "Liquid Ecstasy",
+            "Liquid E",
+            "G",
+            "G-Juice",
+            "Georgia Homeboy",
+            "Fantasy",
+            "Soap",
+            "Seife"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Opioide",
+      "verbs": [
+        "Ballern",
+        "Drücken",
+        "Spritzen",
+        "Hauen",
+        "Boofen"
+      ],
+      "subcategories": [
+        {
+          "name": "Heroin",
+          "terms": [
+            "H",
+            "Gear",
+            "Brown",
+            "Brown Sugar",
+            "Smack",
+            "Stoff",
+            "Shore"
+          ]
+        },
+        {
+          "name": "Fentanyl",
+          "terms": [
+            "Fenty",
+            "Apache",
+            "Dance Fever",
+            "China Town",
+            "China Girl",
+            "M30",
+            "Murder 8",
+            "Tango & Cash",
+            "Jackpot"
+          ]
+        },
+        {
+          "name": "Carfentanil",
+          "terms": [
+            "Drop-Dead",
+            "C-Fent",
+            "Green Heckler"
+          ]
+        },
+        {
+          "name": "Nitazene-Derivate",
+          "terms": [
+            "Frankenstein-Pillen",
+            "Frankenstein-Pills",
+            "Frankies",
+            "ISO"
+          ]
+        },
+        {
+          "name": "Tilidin",
+          "terms": [
+            "Tillys",
+            "Tilis",
+            "Tili",
+            "T-Drops",
+            "Darby",
+            "Darby-Riegel"
+          ]
+        },
+        {
+          "name": "Codein",
+          "terms": [
+            "Lean",
+            "Purple Drank",
+            "Sizzurp",
+            "Hustensaft",
+            "Dirty Sprite",
+            "Wok",
+            "Wock",
+            "Syrup",
+            "Drank",
+            "Barre",
+            "Texas Tea",
+            "Memphis Mud"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Halluzinogene",
+      "verbs": [
+        "Lutschen"
+      ],
+      "subcategories": [
+        {
+          "name": "LSD",
+          "terms": [
+            "Acid",
+            "Pappe",
+            "Ticket",
+            "Zettel",
+            "Trips",
+            "Blotter",
+            "Lucy",
+            "Purple Wedges",
+            "Raketen",
+            "Mikros",
+            "Paper",
+            "Window-Pane",
+            "Sunshine"
+          ]
+        },
+        {
+          "name": "Psilocybin-Pilze",
+          "terms": [
+            "Zauberpilze",
+            "Psilos",
+            "Magic Mushrooms",
+            "Shrooms"
+          ]
+        },
+        {
+          "name": "DMT / 5-MeO-DMT",
+          "terms": [
+            "Dimitri",
+            "Businessman’s Trip",
+            "Yopo"
+          ]
+        },
+        {
+          "name": "NBOMe-Serie",
+          "terms": [
+            "N-Bombs",
+            "Smiles"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Dissoziativa",
+      "verbs": [],
+      "subcategories": [
+        {
+          "name": "Ketamin",
+          "terms": [
+            "Keta",
+            "Käthe",
+            "Tante Käthe",
+            "Special K",
+            "Vitamin K",
+            "KitKat",
+            "Strawberry K"
+          ]
+        },
+        {
+          "name": "2-FDCK / 3-MeO-PCP",
+          "terms": [
+            "F-Ket",
+            "Legal-K",
+            "MXPr"
+          ]
+        },
+        {
+          "name": "PCP",
+          "terms": [
+            "Peace",
+            "Zauberdunst"
+          ]
+        },
+        {
+          "name": "DXM",
+          "terms": [
+            "Robo-Trip",
+            "Skittles",
+            "Triple-C"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Cannabinoide",
+      "verbs": [
+        "Kiffen",
+        "Rauchen",
+        "Vapen",
+        "Dampfen",
+        "Drehen",
+        "Dabben",
+        "High"
+      ],
+      "subcategories": [
+        {
+          "name": "THC-haltiger Cannabis",
+          "terms": [
+            "Weed",
+            "Gras",
+            "Marihuana",
+            "Hasch",
+            "Ganja",
+            "Bubatz",
+            "Ott",
+            "Jibbit",
+            "Dope",
+            "Grünes",
+            "Hecke",
+            "Grüner Türke",
+            "Haze",
+            "Skunk",
+            "Popcorn",
+            "Brokkoli",
+            "Dübel",
+            "Tüte",
+            "Lunte",
+            "Sportzigarette",
+            "Blunt"
+          ]
+        },
+        {
+          "name": "Haschisch",
+          "terms": [
+            "Piece",
+            "Platte",
+            "Schwarzer Afghane",
+            "Zero-Zero"
+          ]
+        },
+        {
+          "name": "Synthetische Cannabinoide",
+          "terms": [
+            "Spice",
+            "Räuchermischung",
+            "K2",
+            "Kraut",
+            "Fake Weed",
+            "Bonzai"
+          ]
+        },
+        {
+          "name": "HHC / THCP",
+          "terms": [
+            "H-Carts",
+            "Hex",
+            "Semi-Legal-High"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Inhalanzien & Sonstiges",
+      "verbs": [],
+      "subcategories": [
+        {
+          "name": "Lachgas (N₂O)",
+          "terms": [
+            "Nos",
+            "N-O-S",
+            "Balloons / Ballons",
+            "Funny Gas",
+            "Lachs"
+          ]
+        },
+        {
+          "name": "Poppers (Amyl-/Iso-Nitrit)",
+          "terms": [
+            "Rush",
+            "Jungle Juice",
+            "TNT"
+          ]
+        },
+        {
+          "name": "Lösungsmittel (Butan u. a.)",
+          "terms": [
+            "Sniff",
+            "Glue",
+            "Gas"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Alkohol",
+      "verbs": [
+        "Saufen",
+        "Trinken"
+      ],
+      "subcategories": [
+        {
+          "name": "Bier",
+          "terms": [
+            "Bier",
+            "Pils",
+            "Pilsener",
+            "Helles",
+            "Lager",
+            "Weizen",
+            "Weißbier",
+            "Hopfenkaltschale",
+            "Gerstensaft",
+            "Bierchen",
+            "Blondes",
+            "Kaltgetränk",
+            "Stiefel",
+            "Büchse"
+          ]
+        },
+        {
+          "name": "Wein",
+          "terms": [
+            "Wein",
+            "Vino",
+            "Rotwein",
+            "Weißwein",
+            "Rosé",
+            "Weinschorle",
+            "Schoppen",
+            "Rebensaft",
+            "Roten",
+            "Weißen",
+            "Traubensaft"
+          ]
+        },
+        {
+          "name": "Spirituosen",
+          "terms": [
+            "Wodka",
+            "Vodka",
+            "Voddi",
+            "Korn",
+            "Gin",
+            "Rum",
+            "Whisky",
+            "Whiskey",
+            "Tequila",
+            "Likör",
+            "Jägermeister",
+            "Hennessy",
+            "Jacky",
+            "Captain",
+            "Bacardi",
+            "Schnaps",
+            "Kurzer",
+            "Shot",
+            "Harter",
+            "Klopfer",
+            "Feigling"
+          ]
+        },
+        {
+          "name": "Alkopops & Mischgetränke",
+          "terms": [
+            "Smirnoff Ice",
+            "Bacardi Breezer",
+            "Hooch",
+            "U-Boot",
+            "Limo-Mix",
+            "Radler",
+            "Mixery",
+            "Alster",
+            "Diesel",
+            "V+ Curuba",
+            "RTD",
+            "Mischi",
+            "Mische"
+          ]
+        }
+      ]
+    }
+  ]
+}

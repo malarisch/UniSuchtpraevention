@@ -7,6 +7,7 @@ import {
 } from 'sequelize';
 import 'dotenv/config'
 import {logger as loggerConstructor} from './logger'
+import {Infer} from "zod/v4";
 const logger = loggerConstructor()
 
 const sequelize = new Sequelize(process.env.PG_DB as string, process.env.PG_USER as string, process.env.PG_PASSWORD as string, {
@@ -107,14 +108,61 @@ Album.init({
   meta: DataTypes.JSONB
 }, { sequelize, modelName: 'album' });
 
+class Substance extends Model<InferAttributes<Substance>, InferCreationAttributes<Substance>> {
+  declare id: CreationOptional<number>;
+  declare name: string
+  declare terms: string[]
+}
+
+class SubstanceCategory extends Model<InferAttributes<SubstanceCategory>, InferCreationAttributes<SubstanceCategory>> {
+  declare id: CreationOptional<number>
+  declare name: string
+  declare verbs: string[]
+}
+
+class Substances_Songs extends Model<InferAttributes<Substances_Songs>, InferCreationAttributes<Substances_Songs>> {
+  declare mentions: number
+  declare indexVersion: number
+}
+Substances_Songs.init({
+  mentions: DataTypes.INTEGER,
+  indexVersion: DataTypes.INTEGER,
+}, {sequelize, modelName: 'Substances_Song' });
+
+Substance.init({
+  id: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  name: DataTypes.TEXT,
+  terms: DataTypes.ARRAY(DataTypes.STRING(256))},
+      {sequelize, modelName: 'Substance'}
+)
+SubstanceCategory.init( {
+  id: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  name: DataTypes.TEXT,
+  verbs: DataTypes.ARRAY(DataTypes.STRING(256))
+}, {sequelize, modelName: 'SubstanceCategories'})
+
+
+SubstanceCategory.hasMany(Substance)
+Substance.hasOne(SubstanceCategory)
+
+
 class SubstanceRating extends Model<InferAttributes<SubstanceRating>, InferCreationAttributes<SubstanceRating>> {
   declare id: CreationOptional<number>;
 
   declare substance: string;
-  declare wortwahl: number;
-  declare hauefigkeit: number;
-  declare perspektive: number;
-  declare kontext: number;
+  declare wording: number;
+  declare perspective: number;
+  declare context: number;
+  declare glamorization: number;
+  declare harmAcknowledgement: number;
   declare sysPromptVer: number;
 }
 SubstanceRating.init({
@@ -124,10 +172,11 @@ SubstanceRating.init({
       primaryKey: true
     },
   substance: DataTypes.STRING,
-  wortwahl: DataTypes.FLOAT,
-  hauefigkeit: DataTypes.FLOAT,
-  perspektive: DataTypes.FLOAT,
-  kontext: DataTypes.FLOAT,
+  wording: DataTypes.FLOAT,
+  perspective: DataTypes.FLOAT,
+  context: DataTypes.FLOAT,
+  glamorization: DataTypes.FLOAT,
+  harmAcknowledgement: DataTypes.FLOAT,
   sysPromptVer: DataTypes.INTEGER
 }, { sequelize, modelName: 'SubstanceRating' });
 
@@ -156,6 +205,10 @@ Album.belongsToMany(Artist, { through: Artist_Albums });
 
 Album.hasMany(Song);
 Song.belongsTo(Album);
+
+Song.belongsToMany(Substance, { through: Substances_Songs });
+Substance.belongsToMany(Song,
+    { through: Substances_Songs})
 
 export async function sync(): Promise<void> {
   await sequelize.sync({
