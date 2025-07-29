@@ -1,14 +1,35 @@
 import {
-  Association, DataTypes, HasManyAddAssociationMixin, HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin, HasManyGetAssociationsMixin, HasManyHasAssociationMixin,
-  HasManySetAssociationsMixin, HasManyAddAssociationsMixin, HasManyHasAssociationsMixin,
-  HasManyRemoveAssociationMixin, HasManyRemoveAssociationsMixin, Model, ModelDefined, Optional,
-  Sequelize, InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute, ForeignKey,
+  Association,
+  DataTypes,
+  HasManyAddAssociationMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyHasAssociationMixin,
+  HasManySetAssociationsMixin,
+  HasManyAddAssociationsMixin,
+  HasManyHasAssociationsMixin,
+  HasManyRemoveAssociationMixin,
+  HasManyRemoveAssociationsMixin,
+  Model,
+  ModelDefined,
+  Optional,
+  Sequelize,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute,
+  ForeignKey,
+  BelongsToManyHasAssociationMixinOptions,
+  BelongsToManyHasAssociationMixin,
+  BelongsToManyAddAssociationMixin,
+  HasOne,
+  BelongsToSetAssociationMixin, BelongsToGetAssociationMixin, BelongsToCreateAssociationMixin,
 } from 'sequelize';
 import 'dotenv/config'
 import {logger as loggerConstructor} from './logger'
 import {Infer} from "zod/v4";
-const logger = loggerConstructor()
+const logger = await loggerConstructor()
 
 const sequelize = new Sequelize(process.env.PG_DB as string, process.env.PG_USER as string, process.env.PG_PASSWORD as string, {
   host: process.env.PG_HOST,
@@ -57,8 +78,14 @@ class Song extends Model<InferAttributes<Song>, InferCreationAttributes<Song>> {
   declare geniusURL: string;
   declare SubstanceRatings?: NonAttribute<SubstanceRating[]>;
   declare mentions: number | null;
-  declare intensity_bin: string | null
-  artists?: NonAttribute<Artist[]> 
+  declare intensity_bin: string | null;
+  artists?: NonAttribute<Artist[]>;
+  Substances?: NonAttribute<Substance[]>;
+  declare hasSubstance: BelongsToManyHasAssociationMixin<Substance, number>
+  declare addSubstance: BelongsToManyAddAssociationMixin<Substance, number>
+  declare addSubstanceCategory: BelongsToManyAddAssociationMixin<SubstanceCategory, number>
+
+
 }
 Song.init({
   id: {
@@ -112,22 +139,92 @@ class Substance extends Model<InferAttributes<Substance>, InferCreationAttribute
   declare id: CreationOptional<number>;
   declare name: string
   declare terms: string[]
+  declare hasSong: HasManyHasAssociationMixin<Song, number>
+  declare addSong: HasManyAddAssociationMixin<Song, number>
+  Songs?: NonAttribute<Song[]>;
+  declare SubstanceCategory: NonAttribute<SubstanceCategory>
+  declare getSubstanceCategory: BelongsToGetAssociationMixin<SubstanceCategory>;
+  declare setSubstanceCategory: BelongsToSetAssociationMixin<SubstanceCategory, number>;
+  declare createSubstanceCategory: BelongsToCreateAssociationMixin<SubstanceCategory>;
 }
 
 class SubstanceCategory extends Model<InferAttributes<SubstanceCategory>, InferCreationAttributes<SubstanceCategory>> {
-  declare id: CreationOptional<number>
-  declare name: string
-  declare verbs: string[]
+  declare id: CreationOptional<number>;
+  declare name: string;
+  declare verbs: string[];
+  Substances?: NonAttribute<Substance[]> | undefined;
+  declare addSubstance: HasManyAddAssociationMixin<Substance, number>;
+  declare hasSubstance: HasManyHasAssociationMixin<Substance, number>;
 }
 
 class Substances_Songs extends Model<InferAttributes<Substances_Songs>, InferCreationAttributes<Substances_Songs>> {
-  declare mentions: number
+  declare id: CreationOptional<number>;
+  declare SubstanceId: number
+  declare songId: number
+  declare locations: number[]
   declare indexVersion: number
+  declare value: string
 }
 Substances_Songs.init({
-  mentions: DataTypes.INTEGER,
+  id: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  locations: DataTypes.ARRAY(DataTypes.INTEGER),
   indexVersion: DataTypes.INTEGER,
-}, {sequelize, modelName: 'Substances_Song' });
+  value: DataTypes.STRING,
+  SubstanceId: {
+    type: DataTypes.INTEGER,
+    unique: false
+  },
+  songId: {
+    type: DataTypes.INTEGER,
+    unique: false
+  },
+}, {sequelize, modelName: 'Substances_Song', indexes: [
+    {
+      unique: true,
+      fields: ['id', 'value']
+    }
+  ]});
+
+class SubstanceCategories_Songs extends Model<InferAttributes<SubstanceCategories_Songs>, InferCreationAttributes<SubstanceCategories_Songs>> {
+  declare id: CreationOptional<number>;
+  declare songId: number
+  declare SubstanceCategoryId: number
+  declare locations: number[]
+  declare indexVersion: number
+  declare value: string
+}
+SubstanceCategories_Songs.init({
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true
+      },
+
+      locations: DataTypes.ARRAY(DataTypes.INTEGER),
+      indexVersion: DataTypes.INTEGER,
+      value: DataTypes.STRING,
+      SubstanceCategoryId: {
+        type: DataTypes.INTEGER,
+        unique: false
+      },
+      songId: {
+        type: DataTypes.INTEGER,
+        unique: false
+      }
+    },
+    {
+      sequelize, modelName: 'SubstanceCat_Songs', indexes: [
+        {
+          unique: true,
+          fields: ['id', 'value']
+        }
+        ]
+    });
+
 
 Substance.init({
   id: {
@@ -150,9 +247,13 @@ SubstanceCategory.init( {
 }, {sequelize, modelName: 'SubstanceCategories'})
 
 
-SubstanceCategory.hasMany(Substance)
-Substance.hasOne(SubstanceCategory)
-
+// Substance gehört zu genau einer Kategorie → foreign key in Substance-Tabelle.
+Substance.belongsTo(SubstanceCategory, {
+  foreignKey: { allowNull: false },
+  onDelete: 'RESTRICT'
+});
+// Optional: reverse side, falls Category → Substances benötigt wird
+SubstanceCategory.hasMany(Substance);
 
 class SubstanceRating extends Model<InferAttributes<SubstanceRating>, InferCreationAttributes<SubstanceRating>> {
   declare id: CreationOptional<number>;
@@ -206,14 +307,19 @@ Album.belongsToMany(Artist, { through: Artist_Albums });
 Album.hasMany(Song);
 Song.belongsTo(Album);
 
-Song.belongsToMany(Substance, { through: Substances_Songs });
-Substance.belongsToMany(Song,
-    { through: Substances_Songs})
+Song.belongsToMany(Substance, { through: {model: Substances_Songs, unique: false, paranoid: false}})
 
-export async function sync(): Promise<void> {
+Substance.belongsToMany(Song,
+    { through: {model: Substances_Songs, unique: false}})
+
+Song.belongsToMany(SubstanceCategory, { through: {model: SubstanceCategories_Songs, unique: false}}, )
+SubstanceCategory.belongsToMany(Song, { through: {model: SubstanceCategories_Songs, unique: false}})
+
+
+export async function sync(alter: boolean = true, logging: boolean = false): Promise<void> {
   await sequelize.sync({
-    alter: true,
-    logging: false
+    alter: alter,
+    logging: logger.debug
   });
 }
 
@@ -264,5 +370,9 @@ export {
   Album,
   Artist_Songs,
   fixSequelizeError,
-  SubstanceRating
+  SubstanceRating,
+    Substance,
+    SubstanceCategory,
+    Substances_Songs,
+    SubstanceCategories_Songs
 }

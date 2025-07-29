@@ -60,11 +60,11 @@ const arena = Arena({
  * Initialise database connection and launch the admin dashboard server.
  * @returns {Promise<void>}
  */
-const start = async () => {
+const start = async (): Promise<void> => {
     const app = express()
     await database.sync()
     const admin = new AdminJS({
-        resources: [database.Album, database.Artist, UserResources.SongsResource, database.SubstanceRating],
+        resources: [database.Album, database.Artist, UserResources.SongsResource, database.SubstanceRating, database.Substance, database.SubstanceCategory],
         componentLoader,
         pages: {
             GeniusTool: GeniusTool.page,

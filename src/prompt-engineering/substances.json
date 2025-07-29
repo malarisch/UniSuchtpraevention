@@ -2,14 +2,14 @@
   "version": 1.0,
   "substances": [
     {
-      "category": "Stimulanzien",
+      "name": "Stimulanzien",
       "verbs": [
         "Ziehen",
         "Sniffen",
         "Schnupfen",
         "Knallen"
       ],
-      "subcategories": [
+      "Substances": [
         {
           "name": "Amphetamin",
           "terms": [
@@ -28,7 +28,7 @@
           "terms": [
             "Crystal",
             "Tina",
-            "Ice / ICE",
+            "Ice",
             "Pervitin",
             "Yaba",
             "Shards"
@@ -45,7 +45,7 @@
             "White Girl",
             "Perico",
             "Mokki",
-            "C",
+            " C ",
             "Steine",
             "Bubble",
             "Königsmischung"
@@ -81,7 +81,7 @@
       ]
     },
     {
-      "category": "Empathogene u. Entactogene",
+      "name": "Empathogene u. Entactogene",
       "verbs": [
         "Schmeißen",
         "Werfen",
@@ -91,7 +91,7 @@
         "Naschen",
         "Dippen"
       ],
-      "subcategories": [
+      "Substances": [
         {
           "name": "MDMA",
           "terms": [
@@ -101,7 +101,7 @@
             "XTC",
             "Molly",
             "Emma",
-            "E",
+            " E ",
             "Disco-Biscuits",
             "Eckies",
             "Kristalle",
@@ -129,17 +129,17 @@
       ]
     },
     {
-      "category": "Sedativa u. Depressiva",
+      "name": "Sedativa u. Depressiva",
       "verbs": [],
-      "subcategories": [
+      "Substances": [
         {
           "name": "Benzodiazepine",
           "terms": [
-            "Xanax",
+            "Xanax ",
             "Alprazolam",
-            "Xan",
-            "Xans",
-            "Xannies",
+            "Xan ",
+            "Xans ",
+            "Xannies ",
             "Bars",
             "Z-Bars",
             "Blues",
@@ -160,9 +160,8 @@
         {
           "name": "GHB / GBL",
           "terms": [
-            "Liquid Ecstasy",
+
             "Liquid E",
-            "G",
             "G-Juice",
             "Georgia Homeboy",
             "Fantasy",
@@ -173,7 +172,7 @@
       ]
     },
     {
-      "category": "Opioide",
+      "name": "Opioide",
       "verbs": [
         "Ballern",
         "Drücken",
@@ -181,11 +180,11 @@
         "Hauen",
         "Boofen"
       ],
-      "subcategories": [
+      "Substances": [
         {
           "name": "Heroin",
           "terms": [
-            "H",
+            " H ",
             "Gear",
             "Brown",
             "Brown Sugar",
@@ -256,11 +255,11 @@
       ]
     },
     {
-      "category": "Halluzinogene",
+      "name": "Halluzinogene",
       "verbs": [
         "Lutschen"
       ],
-      "subcategories": [
+      "Substances": [
         {
           "name": "LSD",
           "terms": [
@@ -306,9 +305,9 @@
       ]
     },
     {
-      "category": "Dissoziativa",
+      "name": "Dissoziativa",
       "verbs": [],
-      "subcategories": [
+      "Substances": [
         {
           "name": "Ketamin",
           "terms": [
@@ -347,7 +346,7 @@
       ]
     },
     {
-      "category": "Cannabinoide",
+      "name": "Cannabinoide",
       "verbs": [
         "Kiffen",
         "Rauchen",
@@ -357,7 +356,7 @@
         "Dabben",
         "High"
       ],
-      "subcategories": [
+      "Substances": [
         {
           "name": "THC-haltiger Cannabis",
           "terms": [
@@ -415,9 +414,9 @@
       ]
     },
     {
-      "category": "Inhalanzien & Sonstiges",
+      "name": "Inhalanzien & Sonstiges",
       "verbs": [],
-      "subcategories": [
+      "Substances": [
         {
           "name": "Lachgas (N₂O)",
           "terms": [
@@ -447,12 +446,12 @@
       ]
     },
     {
-      "category": "Alkohol",
+      "name": "Alkohol",
       "verbs": [
         "Saufen",
         "Trinken"
       ],
-      "subcategories": [
+      "Substances": [
         {
           "name": "Bier",
           "terms": [
@@ -475,7 +474,7 @@
         {
           "name": "Wein",
           "terms": [
-            "Wein",
+            " Wein",
             "Vino",
             "Rotwein",
             "Weißwein",
@@ -526,7 +525,7 @@
             "Mixery",
             "Alster",
             "Diesel",
-            "V+ Curuba",
+            "Curuba",
             "RTD",
             "Mischi",
             "Mische"
