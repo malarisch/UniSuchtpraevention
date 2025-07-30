@@ -1,4 +1,4 @@
-Rating Handbuch v0.2 - 28.07.25 - Beschreibung Überarbeitet
+Rating Handbuch v1.0.1 - 30.07.25 - Befragung gestartet und Link updated
 # Rating Guidelines - Punchlines statt gepanschte Lines
 # Vorwort
 Das Projekt *Punchlines statt gepanschte Lines* findet im Rahmen des Theorie- und Praxisprojekts *Suchtprävention* von Prof. Dr. Florian Rehbein und Bettina Beyer an der FH Münster statt.
