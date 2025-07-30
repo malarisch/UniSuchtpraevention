@@ -138,13 +138,11 @@ program.command("distillGoldenSetForLimeSurvey")
         logger.info("Synced Database.")
         await fs.mkdir(options.folder, { recursive: true })
         let sqlStatement = await fs.readFile("src/prompt-engineering/golden-sets/distillGoldenSet.sql", "utf8");
-        let xmlBase = await fs.readFile("../limesurveyGroup.lsg", "utf8")
+        let xmlBase = await fs.readFile("../groupWithDifferentSubstances.lsg", "utf8")
         logger.info("Read sql Statement. Length: " + sqlStatement.length);
         // @ts-ignore
         let result = await database.sequelize.query(sqlStatement, {type: QueryTypes.SELECT});
         let out = ""
-        //let row = `<row>\n    <group_name><![CDATA[titlePlaceholder]]></group_name>\n    <group_order><![CDATA[1]]></group_order>\n    <description><![CDATA[descPlaceholder]]></description>\n    <language><![CDATA[de]]></language>\n    <randomization_group/>\n    <grelevance><![CDATA[1]]></grelevance>\n   </row>\n`
-        let row = `<row>\n    <gid><![CDATA[5126]]></gid>\n    <sid><![CDATA[671161]]></sid>\n    <group_name><![CDATA[titlePlaceholder]]></group_name>\n    <group_order><![CDATA[1]]></group_order>\n    <description><![CDATA[descPlaceholder]]></description>\n    <language><![CDATA[de]]></language>\n    <randomization_group/>\n    <grelevance><![CDATA[1]]></grelevance>\n   </row>\n`
         for (var i in result) {
             // @ts-ignore
             if (i != 0) {
@@ -154,12 +152,20 @@ program.command("distillGoldenSetForLimeSurvey")
                 // @ts-ignore
                 let title = `${r.artist} - ${r.title}`;
                 //@ts-ignore
-                desc += `Pre-Tagging Result: ${r.intensity_bin} (${r.mentions} Mentions) \r\n`;
+                desc += `Pre-Tagging Result: ${r.intensity_bin} (${r.mentions} Mentions)\r\n`;
                 //@ts-ignore
                 desc += r.lyrics
 
-                out = xmlBase.replace("rowPlaceholder", row.replace("titlePlaceholder", title.substring(0,255)).replace("descPlaceholder", entities.encodeNonAsciiHTML(desc).replaceAll("\r\n", "<br />")));
+                out = xmlBase.replace("titlePlaceholder", title.substring(0,255)).replace("descPlaceholder", entities.encodeNonAsciiHTML(desc).replaceAll("\r\n", "<br />"));
+                out = out.replaceAll("substances", "substances" + i)
+                    .replaceAll("WordingRating", "wording"+i)
+                    .replaceAll("PerspectiveRating", "perspective"+i)
+                    .replaceAll("ContextRating", "context"+i)
+                    .replaceAll("GlamorizationRating", "glamorization"+i)
+                    .replaceAll("HarmAckRating", "harmack"+i)
+                    .replaceAll("anmerkung", "anmerkung"+i)
                 await fs.writeFile( options.folder + "limesurveyGroup"+i+".lsg", out, "utf8");
+                process.exit(0)
 
             }
         }

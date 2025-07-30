@@ -26,7 +26,7 @@ Das manuelle Bewerten von Songs dient dazu
 
 Die vorgegebenen Songtexte sind zufällige Auswahlen aus der Datenbank aus vier Kategorien: keine, wenige, gemäßigt und viele Erwähnungen von Substanzen.
 
-### Link zur Aufgabe: https://limesurvey.fh-muenster.de/index.php/671161?newtest=Y&lang=de
+### Link zur Aufgabe: https://limesurvey.fh-muenster.de/index.php/584496
 
 --- 
 #### Beispiel: Rückmeldung für einen Songtext
