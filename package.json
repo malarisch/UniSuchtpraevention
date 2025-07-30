@@ -20,7 +20,8 @@
     "worker": "node dist/worker.js",
     "dev": "ts-node --experimental-specifier-resolution=node -r tsconfig-paths/register src/webserver.ts",
     "test": "node --test",
-    "build": "ls && tsc -p ./tsconfig.json && tsc-alias -p tsconfig.json"
+    "build": "ls && tsc -p ./tsconfig.json && tsc-alias -p tsconfig.json",
+    "cli": "tsx cli.ts"
   },
   "paths": {
     "@suchtModules/*": [

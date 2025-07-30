@@ -2,7 +2,11 @@
 
 [![wakatime](https://wakatime.com/badge/github/malarisch/UniSuchtpraevention.svg)](https://wakatime.com/badge/github/malarisch/UniSuchtpraevention) [![Docker Image CI](https://github.com/malarisch/UniSuchtpraevention/actions/workflows/docker-image.yml/badge.svg)](https://github.com/malarisch/UniSuchtpraevention/actions/workflows/docker-image.yml)
 
-Dieses Projekt analysiert Songtexte und speichert die Ergebnisse in einer Datenbank. Die Anwendung basiert auf Node.js/TypeScript und nutzt Postgres, Redis und verschiedene Monitoring‑Tools.
+Dieses Projekt analysiert Songtexte und speichert die Ergebnisse in einer Datenbank.
+Ursprünglich in JavaScript gestartet, läuft der Code inzwischen vollständig unter TypeScript.
+Für eine einheitliche Entwicklungs- und Produktionsumgebung kommt Docker zum Einsatz.
+Die Anwendung nutzt Postgres, Redis und verschiedene Monitoring‑Tools.
+Weitere Details zur manuellen Bewertung finden sich im [Rating Handbuch](Rating_handbuch.md).
 
 ## Voraussetzungen
 
@@ -50,6 +54,16 @@ Für die Verarbeitung der Queues kann zusätzlich der Worker gestartet werden:
 npm run worker
 ```
 
+### CLI nutzen
+
+Die Projekt‑CLI befindet sich im Repository‑Root (`cli.ts`) und wird über `tsx`
+ausgeführt. Sie bietet unter anderem Funktionen zum Taggen und Exportieren von
+Daten.
+
+```bash
+npm run cli -- --help
+```
+
 ## Tests ausführen
 
 ```bash
@@ -91,6 +105,10 @@ SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
 OLLAMA_HOST=http://localhost:11434
 OLLAMA_MODEL=llama3:latest
 ```
+
+## Daten
+
+Die verwendeten Song-Datensätze können aus urheberrechtlichen Gründen leider nicht veröffentlicht werden.
 
 ## Lizenz
 
