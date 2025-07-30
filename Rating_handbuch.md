@@ -1,7 +1,7 @@
 Rating Handbuch v0.2 - 28.07.25 - Beschreibung Überarbeitet
 # Rating Guidelines - Punchlines statt gepanschte Lines
 # Vorwort
-Das Projekt "*Punchlines statt gepanschte Lines*" findet im Rahmen des Theorie- und Praxisprojekts *Suchtprävention* von Prof. Dr. Florian Rehbein und Bettina Beyer an der FH Münster statt.
+Das Projekt *Punchlines statt gepanschte Lines* findet im Rahmen des Theorie- und Praxisprojekts *Suchtprävention* von Prof. Dr. Florian Rehbein und Bettina Beyer an der FH Münster statt.
 Innerhalb des Projekts wird analysiert, ob es einen statistischen Zusammenhang zwischen Konsumverhalten/Attitüde von Jugendlichen zu verschiedenen psychotropen Substanzen und dem Vorkommen/Darstellung in der gehörten Musik, insbes. Deutschrap, gibt.
 Die Ergebnisse der Studie könnten einen guten Anhaltspunkt bieten, inwieweit aktuelle Suchtpräventionsprogramme der Lebensrealität von Jugendlichen entsprechen, wo noch nachjustiert werden muss oder um blinde Flecke offenzulegen.
 
@@ -25,6 +25,10 @@ Das manuelle Bewerten von Songs dient dazu
  - C) der Anpassungen der Gewichtungen zur Berechnung des Gesamtscores.
 
 Die vorgegebenen Songtexte sind zufällige Auswahlen aus der Datenbank aus vier Kategorien: keine, wenige, gemäßigt und viele Erwähnungen von Substanzen.
+
+Die Antworten können in diesem Formular eingetragen werden:
+https://docs.google.com/forms/d/e/1FAIpQLSfMeYjm18AzGeNoZ3fPJSP_tNp2sLef0r2fgpp9uWFeK1ujuw/viewform?usp=preview  
+--- 
 #### Beispiel: Rückmeldung für einen Songtext
 Alkohol:
  - Wording: +1
@@ -39,6 +43,8 @@ Cannabis:
 - Context/Consequences: +1
 - Glamorization: +2
 - Harm Acknowledgement: -1
+
+---
 
 # Rating-Dimensionen
 Zuerst wird eine Liste aller genannten Substanzen im Songtext angelegt. Zur Hilfestellung findet sich später in diesem Dokument ein Glossar.
@@ -145,7 +151,7 @@ Danach wird das folgende Schema für jede gefundene Substanz abgearbeitet. Die S
 
 
 # Beispielhafte Liste von Substanzen und Szenebegriffen
-_Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hilfetelefonnummern liefern. Alle Begriffe sind in der freien Wildbahn gefunden worden, so rassistisch und misogyn sie auch sein mögen._
+_Alle Begriffe sind in der freien Wildbahn gefunden worden, so rassistisch und misogyn sie auch sein mögen._
  - ### Stimulanzien
      - Ziehen
      - Sniffen
@@ -489,19 +495,18 @@ _Du weißt, dass die Recherche gut war, wenn Google und ChatGPT dir nur noch Hil
 # Appendix: Gewichtungen und Gesamtscore
 Das Folgende muss auf keinen Fall berechnet werden! Dient nur zur internen Dokumentation!
 ## Start-Gewichtung:
-| Dimension            | Gewichtung                                                                                                                                                                                                                                                                                                                                                                                                                   |
-|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Wording              | ${p}_{w} = 0.25$                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Perspective          | Unterschiedlich gewertet, da positive Werte größeren Impact haben als negative:<br>${p}_{p}(x) = \begin{cases} \alpha \cdot x & \text{wenn } x \leq 0 \\ \beta \cdot e^{\gamma x}   & \text{wenn } x > 0 \end{cases}$<br>$\alpha = 0.2$ (Lineares Gewicht negative Werte)<br>$\beta = 0.3$ (Basisgewicht positive Werte)<br>$\gamma = 0.5$ (Exponentieller Wachstumsfaktor positive Werte)<br>$x$ ist das abgegebene Rating. |
-| Context/Consequences | ${p}_{c} = 0.20$                                                                                                                                                                                                                                                                                                                                                                                                             | 
-| Glamorization        | ${p}_{g} = 0.15$                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Harm Acknowledgement | ${p}_{h} =  0.30$                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Mentions             | ${p}_{m} = 0.05$                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Dimension            | Gewichtung                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Wording              | ${p}_{w} = 0.25$                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Perspective          | Unterschiedlich gewertet, da positive Werte größeren Impact haben als negative:<br>$${p}_{p}(x) = \begin{cases} \alpha \cdot x & \text{wenn } x \leq 0 \\ \beta \cdot e^{\gamma x}   & \text{wenn } x > 0 \end{cases}$$<br>$\alpha = 0.2$ (Lineares Gewicht negative Werte)<br>$\beta = 0.3$ (Basisgewicht positive Werte)<br>$\gamma = 0.5$ (Exponentieller Wachstumsfaktor positive Werte)<br>$x$ ist das abgegebene Rating. |
+| Context/Consequences | ${p}_{c} = 0.20$                                                                                                                                                                                                                                                                                                                                                                                                               | 
+| Glamorization        | ${p}_{g} = 0.15$                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Harm Acknowledgement | ${p}_{h} = 0.30$                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Mentions             | ${p}_{m} = 0.05$                                                                                                                                                                                                                                                                                                                                                                                                               |
 ## Start-Formel:
 Diese Formel soll einen Anhaltspunkt geben, wie der Gesamtscore für jeden Song berechnet wird.  
 *Sie muss nicht von Rater\*innen berechnet werden!*
-$$
-\textnormal{Overall =}
+$$\textnormal{Overall =}
 \frac{\sum_{i = 1}^{s}
 {w}_{i} {p}_{w} +
 {p}_{i} {p}_{p} +

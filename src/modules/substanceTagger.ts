@@ -187,3 +187,8 @@ export async function tagSong(song: Song | number) {
         }
     }
 }
+
+export async function updateSongSubstanceMentionCount(all: boolean = true, id: number | null = null) {
+
+
+}

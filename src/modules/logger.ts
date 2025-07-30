@@ -5,10 +5,11 @@ import pretty from 'pino-pretty'
 import {log} from "@adminjs/express";
 export async function logger(): Promise<import('pino').Logger> {
     const pino = (await import('pino')).default;
+    console.log("Logging Local: ", process.env.LOGGING_LOCAL)
     if (process.env.LOGGING_LOCAL == "true") {
 
         const logger = pino({
-            level: 'warn',
+            level: 'debug',
             transport: {
                 target: 'pino-pretty'
             }

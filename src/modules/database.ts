@@ -34,7 +34,7 @@ const logger = await loggerConstructor()
 const sequelize = new Sequelize(process.env.PG_DB as string, process.env.PG_USER as string, process.env.PG_PASSWORD as string, {
   host: process.env.PG_HOST,
   dialect: 'postgres',
-  logging: false
+  logging: true
 });
 
 
@@ -318,8 +318,7 @@ SubstanceCategory.belongsToMany(Song, { through: {model: SubstanceCategories_Son
 
 export async function sync(alter: boolean = true, logging: boolean = false): Promise<void> {
   await sequelize.sync({
-    alter: alter,
-    logging: logger.debug
+    alter: alter
   });
 }
 
