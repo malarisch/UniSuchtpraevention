@@ -1,20 +1,19 @@
-import dotenv from 'dotenv';
-dotenv.config();
-import { InfluxDBClient, Point } from '@influxdata/influxdb3-client';
-import pretty from 'pino-pretty'
-import {log} from "@adminjs/express";
+
+import {InfluxDBClient, Point} from '@influxdata/influxdb3-client';
+import dotenv from "dotenv"; dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
+dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
+
 export async function logger(): Promise<import('pino').Logger> {
     const pino = (await import('pino')).default;
     console.log("Logging Local: ", process.env.LOGGING_LOCAL)
     if (process.env.LOGGING_LOCAL == "true") {
 
-        const logger = pino({
-            level: 'debug',
+        return pino({
+            level: process.env.LOG_LEVEL || 'debug',
             transport: {
                 target: 'pino-pretty'
             }
-        })
-        return logger;
+        });
     } else {
         const pinoLoki = (await import('pino-loki')).default;
 
@@ -47,11 +46,10 @@ export async function logger(): Promise<import('pino').Logger> {
             sync: true
 
         })
-        const logger = pino(
+        return pino(
             {level: process.env.LOG_LEVEL || 'info'},
             transport
-        );
-        return logger
+        )
     }
 
 };

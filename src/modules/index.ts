@@ -1,4 +1,4 @@
-
+import dotenv from "dotenv"; dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
 
 export * as aiConnector from '@suchtModules/aiConnector'
 

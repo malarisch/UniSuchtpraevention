@@ -1,11 +1,10 @@
 import {logger as loggerConstructor} from './index'
 import {Song, Substance, SubstanceCategory, Substances_Songs, SubstanceCategories_Songs} from "@suchtModules/database";
-
+import dotenv from "dotenv"; dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
 const logger =
     await loggerConstructor.logger();
 import fs from 'fs/promises'
 
-import 'dotenv/config'
 
 
 interface FileSubstance {
@@ -145,7 +144,7 @@ export async function tagSong(song: Song | number) {
                 locs.push(k.index);
             }
             if (locs.length > 0) {
-                logger.info(`Found ${regexSubstances[i].top.name} with ${regexSubstances[i].value} at ${JSON.stringify(locs)} in ${song.title}`)
+                logger.debug(`Found ${regexSubstances[i].top.name} with ${regexSubstances[i].value} at ${JSON.stringify(locs)} in ${song.title}`)
                 if (regexSubstances[i].top instanceof Substance) {
                     await Substances_Songs.findOrCreate({where: {
                         //@ts-ignore

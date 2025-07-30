@@ -5,11 +5,7 @@
  * @module aiConnector
  */
 import type { InferCreationAttributes } from 'sequelize';
-import axios, { isCancel, AxiosError } from 'axios';
-import 'dotenv/config'
-import Genius from 'genius-lyrics';
-
-import * as html from 'node-html-parser'
+import dotenv from "dotenv"; dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
 import OpenAI from 'openai'
 import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";

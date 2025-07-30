@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import dotenv from "dotenv"; dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
 import {logger as loggerConstructor} from '@suchtModules/index'
 import fs from 'fs/promises'
 import { z } from 'zod';

@@ -26,8 +26,8 @@ Das manuelle Bewerten von Songs dient dazu
 
 Die vorgegebenen Songtexte sind zufällige Auswahlen aus der Datenbank aus vier Kategorien: keine, wenige, gemäßigt und viele Erwähnungen von Substanzen.
 
-Die Antworten können in diesem Formular eingetragen werden:
-https://docs.google.com/forms/d/e/1FAIpQLSfMeYjm18AzGeNoZ3fPJSP_tNp2sLef0r2fgpp9uWFeK1ujuw/viewform?usp=preview  
+### Link zur Aufgabe: https://limesurvey.fh-muenster.de/index.php/671161?newtest=Y&lang=de
+
 --- 
 #### Beispiel: Rückmeldung für einen Songtext
 Alkohol:

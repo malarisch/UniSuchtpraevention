@@ -4,7 +4,7 @@
  * @module geniusFetcher
  */
 import axios from 'axios';
-import 'dotenv/config'
+import dotenv from "dotenv"; dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
 import Genius, { ArtistsClient } from 'genius-lyrics';
 import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './index'
 import { CreationOptional, InferAttributes, InferCreationAttributes } from 'sequelize';

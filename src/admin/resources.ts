@@ -12,8 +12,8 @@ async function hasAnalysis(response: any, request: any, context: any) {
                     for (var i in context.records) {
                         let song = await database.Song.findByPk(context.records[i].params.id, {include: database.SubstanceRating});
                         
-                        context.records[i].params.hasAnalysis = ((song?.SubstanceRatings as database.SubstanceRating[]).length > 0 ? true : false)
-                        context.records[i].params.hasLyrics = (context.records[i].params.lyrics == null ? false : true)
+                        context.records[i].params.hasAnalysis = ((song?.SubstanceRatings as database.SubstanceRating[]).length > 0)
+                        context.records[i].params.hasLyrics = (context.records[i].params.lyrics != null)
                     }
                     
                     return response
@@ -26,7 +26,7 @@ export const SongsResource = {
             fetchLyrics: {
                 actionType: 'record',
                 component: false,
-                handler: async (reques: any, response: any, context: any) => {
+                handler: async (request: any, response: any, context: any) => {
                     const { record } = context;
                     if (!record) {
                         throw new Error('Kein Datensatz gefunden');
@@ -58,12 +58,12 @@ export const SongsResource = {
                     if (!record) {
                         throw new Error('Kein Datensatz gefunden');
                     }
-                    var aiAnalse = await rateLyrics(record.params.lyrics)
-                    var addedSets = await addRatingToDb(aiAnalse, record.params.id)
+                    var aiAnalyse = await rateLyrics(record.params.lyrics)
+                    var addedSets = await addRatingToDb(aiAnalyse, record.params.id)
                     return {
                         record: record.toJSON(),
                         notice: {
-                            message: JSON.stringify({analysis: aiAnalse, addedDatasets: addedSets}),
+                            message: JSON.stringify({analysis: aiAnalyse, addedDatasets: addedSets}),
                             type: 'success'
                         }
 

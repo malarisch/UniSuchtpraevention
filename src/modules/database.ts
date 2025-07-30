@@ -26,7 +26,8 @@ import {
   HasOne,
   BelongsToSetAssociationMixin, BelongsToGetAssociationMixin, BelongsToCreateAssociationMixin,
 } from 'sequelize';
-import 'dotenv/config'
+
+import dotenv from "dotenv"; dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
 import {logger as loggerConstructor} from './logger'
 import {Infer} from "zod/v4";
 const logger = await loggerConstructor()
@@ -34,7 +35,7 @@ const logger = await loggerConstructor()
 const sequelize = new Sequelize(process.env.PG_DB as string, process.env.PG_USER as string, process.env.PG_PASSWORD as string, {
   host: process.env.PG_HOST,
   dialect: 'postgres',
-  logging: true
+  logging: false
 });
 
 

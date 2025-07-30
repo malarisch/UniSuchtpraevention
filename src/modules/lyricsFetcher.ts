@@ -2,8 +2,8 @@
  * Helper functions for retrieving lyrics from Genius URLs.
  * @module lyricsFetcher
  */
+import dotenv from "dotenv"; dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
 import axios from 'axios';
-import 'dotenv/config'
 import { parse as htmlParser } from 'node-html-parser'
 import { lyricsFetcher, database, logger as loggerConstructor } from './index'
 const logger = await loggerConstructor.logger()

@@ -5,8 +5,11 @@ import * as process from "node:process";
 import * as cliProgress from 'cli-progress';
 import colors from 'ansi-colors';
 import fs from "node:fs/promises";
-import {QueryTypes} from "sequelize";
+import {fn, QueryTypes} from "sequelize";
+import * as entities from 'entities'
 
+import {Song, SubstanceCategories_Songs, Substances_Songs} from '@suchtModules/database'
+import dotenv from "dotenv"; dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
 const logger = await loggerConstructor.logger()
 
 const program = new Command();
@@ -21,11 +24,21 @@ program.command('tagger')
     .option("-f, --filename <filename>", "Used Filename")
     .option("-s, --tag-song <id>", "Tag song with <id>")
     .option(" --toId <id>", "from id to id")
+    .option("-a, --all", "Use all songs")
+    .option("--prune", "Remove all associations first.")
     .action(async (options) => {
         console.log("Syncing Database...");
         await database.sync();
         console.log("Synced Database.")
-        console.debug(options)
+        if (options.prune) {
+            logger.warn("Removing all Substance/Song Tags")
+            await Substances_Songs.truncate();
+            logger.warn("Removed all Instances of Substances_Songs")
+            await SubstanceCategories_Songs.truncate();
+            logger.warn("Removed all Instances of SubstanceCategories_Songs")
+            await database.sequelize.query("ALTER SEQUENCE \"SubstanceCat_Songs_id_seq\" RESTART; ALTER SEQUENCE \"Substances_Songs_id_seq\" RESTART;")
+
+        }
         if (options.update && options.filename) {
             console.log("Importing " + options.filename);
             await substanceTagger.importIndexToDatabase(options.filename);
@@ -35,21 +48,38 @@ program.command('tagger')
             await substanceTagger.tagSong(options["tagSong"]);
         } else if (options.tagSong && options.toId) {
             logger.info("Tagging Song with id " + options["tagSong"] + " to " + options.toId);
-                const bar = new cliProgress.SingleBar({format: 'CLI Progress |' + colors.cyan('{bar}') + '| {percentage}% || {value}/{total} Chunks || Speed: {speed}',
+                const bar = new cliProgress.SingleBar({format: 'CLI Progress |' + colors.cyan('{bar}') + '| {percentage}% || {value}/{total} Songs',
                     barCompleteChar: '\u2588',
                     barIncompleteChar: '\u2591',
                     hideCursor: true
                 }, cliProgress.Presets.shades_classic);
-                bar.start(options.toId - options.tagSong, 0)
-                for (let i = options.tagSong; i <= options.toId; i++) {
-                    logger.info("Tagging Song with id " + i);
-                    try {
-                        await substanceTagger.tagSong(i)
-                    } catch (e) {
-                        logger.error(e)
+                let songs: Song[];
+                let noLyrics = 0;
+                if (options.all) {
+                    songs = await Song.findAll();
+                    bar.start(songs.length, 0)
+                    for (let i in songs) {
+                        let song = songs[i];
+                        try {await substanceTagger.tagSong(song);}
+                        catch (e) {
+                            noLyrics++;
+                        }
+                        bar.increment(1)
                     }
+                    if (noLyrics > 0) logger.warn(noLyrics + " Songs without lyrics");
 
-                    bar.update(i);
+                } else {
+                    bar.start(options.toId - options.tagSong, 0)
+                    for (let i = options.tagSong; i <= options.toId; i++) {
+                        logger.info("Tagging Song with id " + i);
+                        try {
+                            await substanceTagger.tagSong(i)
+                        } catch (e) {
+                            logger.error(e)
+                        }
+
+                        bar.update(i);
+                    }
                 }
                 bar.stop();
 
@@ -58,12 +88,13 @@ program.command('tagger')
         process.exit(0);
     })
 program.command("distillGoldenSet")
+    .description("Stratifizierte Stichprobe von Songtexten anhand der Substance Counts aus der Datenbank nach Markdown exportieren")
     .option("--outfile <filename>", "Output file name")
     .action(async (options) => {
         logger.info("Syncing Database...");
         await database.sync();
         logger.info("Synced Database.")
-        let sqlStatement = await fs.readFile("src/prompt-engineering/golden-sets/lyrics/distillGoldenSet.sql", "utf8");
+        let sqlStatement = await fs.readFile("src/prompt-engineering/golden-sets/distillGoldenSet.sql", "utf8");
         logger.info("Read sql Statement. Length: " + sqlStatement.length);
         let result = await database.sequelize.query(sqlStatement, {type: QueryTypes.SELECT});
         console.debug(result);
@@ -83,6 +114,57 @@ program.command("distillGoldenSet")
         }
         await fs.writeFile(options.outfile, outputString, "utf8");
         process.exit(0);
+    })
+
+program.command("updateSubstanceMentions")
+    .description("Update mentions and intensity_bin after updating the substance index")
+    .action(async (options) => {
+        logger.info("Syncing Database...");
+        await database.sync();
+        logger.info("Synced Database.")
+        let sqlStatement = await fs.readFile("src/prompt-engineering/golden-sets/updateSongIntensities.sql", "utf8");
+        logger.info("Read sql Statement. Length: " + sqlStatement.length);
+        let result = await database.sequelize.query(sqlStatement, {type: QueryTypes.UPDATE});
+        logger.debug(result);
+    })
+
+
+program.command("distillGoldenSetForLimeSurvey")
+    .description("Stratifizierte Stichprobe von Songtexten anhand der Substance Counts aus der Datenbank nach Markdown exportieren")
+    .option("--folder <filename>", "Output folder name")
+    .action(async (options) => {
+        logger.info("Syncing Database...");
+        await database.sync();
+        logger.info("Synced Database.")
+        await fs.mkdir(options.folder, { recursive: true })
+        let sqlStatement = await fs.readFile("src/prompt-engineering/golden-sets/distillGoldenSet.sql", "utf8");
+        let xmlBase = await fs.readFile("../limesurveyGroup.lsg", "utf8")
+        logger.info("Read sql Statement. Length: " + sqlStatement.length);
+        // @ts-ignore
+        let result = await database.sequelize.query(sqlStatement, {type: QueryTypes.SELECT});
+        let out = ""
+        //let row = `<row>\n    <group_name><![CDATA[titlePlaceholder]]></group_name>\n    <group_order><![CDATA[1]]></group_order>\n    <description><![CDATA[descPlaceholder]]></description>\n    <language><![CDATA[de]]></language>\n    <randomization_group/>\n    <grelevance><![CDATA[1]]></grelevance>\n   </row>\n`
+        let row = `<row>\n    <gid><![CDATA[5126]]></gid>\n    <sid><![CDATA[671161]]></sid>\n    <group_name><![CDATA[titlePlaceholder]]></group_name>\n    <group_order><![CDATA[1]]></group_order>\n    <description><![CDATA[descPlaceholder]]></description>\n    <language><![CDATA[de]]></language>\n    <randomization_group/>\n    <grelevance><![CDATA[1]]></grelevance>\n   </row>\n`
+        for (var i in result) {
+            // @ts-ignore
+            if (i != 0) {
+                //@ts-ignore
+                let r = result[i];
+                let desc = ""
+                // @ts-ignore
+                let title = `${r.artist} - ${r.title}`;
+                //@ts-ignore
+                desc += `Pre-Tagging Result: ${r.intensity_bin} (${r.mentions} Mentions) \r\n`;
+                //@ts-ignore
+                desc += r.lyrics
+
+                out = xmlBase.replace("rowPlaceholder", row.replace("titlePlaceholder", title.substring(0,255)).replace("descPlaceholder", entities.encodeNonAsciiHTML(desc).replaceAll("\r\n", "<br />")));
+                await fs.writeFile( options.folder + "limesurveyGroup"+i+".lsg", out, "utf8");
+
+            }
+        }
+
+
     })
 
 program.parse();

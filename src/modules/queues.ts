@@ -1,8 +1,9 @@
 import {Queue, Job} from 'bullmq'
+import dotenv from "dotenv"; dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
 import {logger as loggerConstructor} from './index'
 
 import IORedis, { Redis } from 'ioredis';
-import 'dotenv/config'
+
 
 const logger = await loggerConstructor.logger();
 export const aiAnalysisQueueName = 'aiAnalysis'
