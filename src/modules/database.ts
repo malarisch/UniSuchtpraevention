@@ -259,13 +259,16 @@ SubstanceCategory.hasMany(Substance);
 class SubstanceRating extends Model<InferAttributes<SubstanceRating>, InferCreationAttributes<SubstanceRating>> {
   declare id: CreationOptional<number>;
 
-  declare substance: string;
+  declare substanceCategory: string;
+  declare substances: string[];
+  declare justification?: string;
   declare wording: number;
   declare perspective: number;
   declare context: number;
   declare glamorization: number;
   declare harmAcknowledgement: number;
   declare sysPromptVer: number;
+  declare model: string;
 }
 SubstanceRating.init({
   id: {
@@ -273,13 +276,16 @@ SubstanceRating.init({
       autoIncrement: true,
       primaryKey: true
     },
-  substance: DataTypes.STRING,
+  substanceCategory: DataTypes.STRING,
+  substances: DataTypes.ARRAY(DataTypes.STRING(350)),
+  justification: {type: DataTypes.TEXT, allowNull: true},
   wording: DataTypes.FLOAT,
   perspective: DataTypes.FLOAT,
   context: DataTypes.FLOAT,
   glamorization: DataTypes.FLOAT,
   harmAcknowledgement: DataTypes.FLOAT,
-  sysPromptVer: DataTypes.INTEGER
+  sysPromptVer: DataTypes.INTEGER,
+  model: DataTypes.STRING
 }, { sequelize, modelName: 'SubstanceRating' });
 
 class Artist_Songs extends Model<InferAttributes<Artist_Songs>, InferCreationAttributes<Artist_Songs>> {
@@ -313,7 +319,7 @@ Song.belongsToMany(Substance, { through: {model: Substances_Songs, unique: false
 Substance.belongsToMany(Song,
     { through: {model: Substances_Songs, unique: false}})
 
-Song.belongsToMany(SubstanceCategory, { through: {model: SubstanceCategories_Songs, unique: false}}, )
+Song.belongsToMany(SubstanceCategory, { through: {model: SubstanceCategories_Songs, unique: false}})
 SubstanceCategory.belongsToMany(Song, { through: {model: SubstanceCategories_Songs, unique: false}})
 
 

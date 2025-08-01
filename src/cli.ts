@@ -7,6 +7,7 @@ import colors from 'ansi-colors';
 import fs from "node:fs/promises";
 import {fn, QueryTypes} from "sequelize";
 import * as entities from 'entities'
+import { QueueList } from '@suchtModules/queues';
 
 import {Song, SubstanceCategories_Songs, Substances_Songs} from '@suchtModules/database'
 import dotenv from "dotenv"; dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
@@ -172,6 +173,59 @@ program.command("distillGoldenSetForLimeSurvey")
 
 
     })
+program
+    .command('checkAiAnalyses')
+    .description('Check which songs already have AI annotations and enqueue jobs for missing ones.')
+    .action(async () => {
+        try {
+            logger.info('Syncing Database...');
+            await database.sync();
+            logger.info('Database synced.');
+
+            logger.info('Fetching all songs...');
+            const songs = await Song.findAll({include: database.SubstanceRating});
+            logger.info(`Fetched ${songs.length} songs from the database.`);
+
+            const unannotatedSongs = [];
+            const progressBar = new cliProgress.SingleBar({
+                format: 'Processing Songs |' + colors.cyan('{bar}') + '| {percentage}% || {value}/{total} Songs',
+                barCompleteChar: '\u2588',
+                barIncompleteChar: '\u2591',
+                hideCursor: true,
+            }, cliProgress.Presets.shades_classic);
+
+            progressBar.start(songs.length, 0);
+
+            for (const song of songs) {
+                progressBar.increment();
+                if (!song.SubstanceRatings || song.SubstanceRatings.length === 0) {
+                    unannotatedSongs.push(song);
+                }
+            }
+
+            progressBar.stop();
+
+            logger.info(`${unannotatedSongs.length} songs without AI annotations found.`);
+            if (unannotatedSongs.length > 0) {
+                logger.info('Enqueuing jobs for AI analysis...');
+                for (const song of unannotatedSongs) {
+                    await QueueList.aiAnalysisQueue.add('aiAnalysis', {
+                        internalId: song.id,
+                    });
+                    logger.info(`Job enqueued for Song ID: ${song.id}, Title: "${song.title}"`);
+                }
+                logger.info('Jobs for all unannotated songs have been successfully enqueued.');
+            } else {
+                logger.info('All songs already have AI annotations.');
+            }
+        } catch (error) {
+            logger.error('An error occurred while processing songs:', error);
+        } finally {
+            process.exit(0);
+        }
+    });
+
+
 
 program.parse();
 program.showHelpAfterError();

@@ -13,36 +13,38 @@ import * as fs from 'node:fs/promises'
 import { geniusFetcher, lyricsFetcher, database, logger as loggerConstructor } from './index'
 import { Point } from '@influxdata/influxdb3-client';
 const logger = await loggerConstructor.logger();
-/**
- * @typedef {Object} SongAnalysis
- * @property {string} substance Name of the detected substance
- * @property {number} wortwahl Word choice score
- * @property {number} perspektive Perspective score
- * @property {number} kontext Context score
- * @property {number} hauefigkeit Frequency score
- * @property {number} [songId] Related song ID
- * @property {number} [sysPromptVer] Version of the system prompt
- */
-
-/**
- * @typedef {Object} Substances
- * @property {SongAnalysis[]} substances Array of analyses returned from the AI
- */
 
 
-const systemPrompt = await fs.readFile("./systemprompt.txt", "utf8");
-const sysPromptVer = 1
+
+
+const systemPrompt = await fs.readFile("./src/prompts/substanceAnalysis.txt", "utf8");
+const jsonSchemaOpenAI = JSON.parse(await fs.readFile("./src/prompts/substanceAnalysis.schema.json", "utf8"))
+const sysPromptVer = 2
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_KEY
+    apiKey: process.env.OPENAI_KEY,
+    logger: logger.child({ name: "openai" }),
 });
 
 export const songAnalysisSchema = z.object(
     {
-        substance: z.string(),
-        wortwahl: z.number(),
-        perspektive: z.number(),
-        kontext: z.number(),
-        hauefigkeit: z.number()
+        substanceCategory: z.enum([
+            "Alkohol",
+            "Cannabinoide",
+            "Stimulanzien",
+            "Opioide",
+            "Sedativa",
+            "Halluzinogene",
+            "Dissoziativa",
+            "Sonstiges"
+        ]),
+        substances: z.array(z.string()).min(1),
+        wording: z.number().min(-2).max(2),
+        perspective: z.number().min(-2).max(2),
+        context: z.number().min(-2).max(2),
+        glamorization: z.number().min(-2).max(2),
+        harmAcknowledgement: z.number().min(-2).max(0),
+        justification: z.string()
+
 
     }
 )
@@ -53,27 +55,31 @@ type substancesSchema = {
     InferCreationAttributes<database.SubstanceRating> & {
       songId?: number;
       sysPromptVer?: number;
+      model?: string;
     }
   >;
 }
+const model = "o4-mini"
 /**
  * Send lyrics to OpenAI and return the parsed rating.
  * @param {string} lyrics Text to analyse
  * @returns {Promise<Substances>} Parsed result from the AI
  */
-export async function rateLyrics(lyrics: string) {
+export async function rateLyrics(lyrics: string): Promise<substancesSchema> {
+
     const startTime = Date.now()
     try {
-    logger.info(lyrics)
     const response = await openai.responses.parse({
-        model: "gpt-4o",
+        model: model,
+
         input: [
-            {
-                role: "system",
-                content: systemPrompt,
-            },
             { role: "user", content: lyrics },
+
         ],
+        reasoning: {
+            effort: "medium",
+            summary: null
+        },
         text: {
             format: zodTextFormat(substancesSchema, "substance_rating_schema"),
         },
@@ -85,11 +91,11 @@ export async function rateLyrics(lyrics: string) {
         .setTimestamp(new Date())
     await loggerConstructor.writeInflux([p])
     logger.info(response.output_parsed);
-    return response.output_parsed as substancesSchema;
+    return response.output_parsed as unknown as substancesSchema;
 } catch (e) {
     throw e;
 } finally {
-    loggerConstructor.exportTaskTime("aiAnalysis", (Date.now() - startTime))
+    await loggerConstructor.exportTaskTime("aiAnalysis", (Date.now() - startTime))
 
 }
 }
@@ -100,12 +106,13 @@ export async function rateLyrics(lyrics: string) {
  * @param {number} songId ID of the song to associate
  * @returns {Promise<void>}
  */
-export async function addRatingToDb(ratings: substancesSchema, songId: number) {
+export async function addRatingToDb(ratings: substancesSchema, songId: number): Promise<void> {
     const startTime = Date.now()
     try {
-    for (const element of ratings.substances) {
+    for (let element of ratings.substances) {
         element.songId = songId
         element.sysPromptVer = sysPromptVer
+        element.model = model
         let subst = await database.SubstanceRating.create(element)
         logger.info ("Added", subst)
     };

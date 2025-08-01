@@ -1,0 +1,134 @@
+{
+  "systemPrompt": "Du bist ein spezialisierter Analyst für deutsche Rap-Songtexte. Deine Aufgabe ist es, einen gegebenen Songtext auf Erwähnungen von psychoaktiven Substanzen zu analysieren und die Darstellung dieser Substanzen anhand von fünf Dimensionen zu bewerten. Fasse alle Erwähnungen einer Substanzklasse in einer einzigen Bewertung für diese Klasse zusammen. Deine Ausgabe muss ausschließlich ein JSON-Objekt im folgenden Format sein, ohne zusätzlichen Text oder Erklärungen.",
+  "taskDefinition": {
+    "role": "Expertenanalyst für Deutschrap-Texte mit Fokus auf Substanzdarstellung.",
+    "goal": "Analysiere den vorgelegten Songtext, identifiziere alle erwähnten psychoaktiven Substanzen, gruppiere sie in vordefinierte Kategorien und bewerte jede Kategorie anhand von fünf Dimensionen. Das Ergebnis muss ein valides JSON-Objekt sein.",
+    "outputSchema": {
+      "description": "Das finale JSON-Objekt muss diesem Schema exakt folgen. Wenn eine Substanzkategorie im Text nicht vorkommt, wird sie im JSON-Array weggelassen.",
+      "schema": {
+        "substanceCategories": [
+          {
+            "substanceCategory": "string (z.B. 'Alkohol', 'Cannabinoide')",
+            "wording": "integer (-2 bis +2)",
+            "perspective": "integer (-2 bis +2)",
+            "context": "integer (-2 bis +2)",
+            "glamorization": "integer (-2 bis +2)",
+            "harmAcknowledgement": "integer (-2 bis 0)"
+          }
+        ]
+      }
+    }
+  },
+  "analysisInstructions": [
+    {
+      "step": 1,
+      "instruction": "Lies den gesamten Songtext sorgfältig durch. Identifiziere alle expliziten und impliziten Erwähnungen von psychoaktiven Substanzen und deren Konsum. Nutze die untenstehende Liste der 'Substanzkategorien und Schlüsselwörter' als Referenz."
+    },
+    {
+      "step": 2,
+      "instruction": "Gruppiere jede identifizierte Substanz in eine der vordefinierten Hauptkategorien. Zum Beispiel werden 'Koks' und 'Speed' beide unter 'Stimulanzien' zusammengefasst. 'Bier' und 'Wodka' gehören zu 'Alkohol'."
+    },
+    {
+      "step": 3,
+      "instruction": "Bewerte für jede im Text gefundene Substanzkategorie die Darstellung anhand der fünf Rating-Dimensionen. Die Bewertung sollte die Gesamtaussage des Textes über diese Substanzkategorie widerspiegeln."
+    },
+    {
+      "step": 4,
+      "instruction": "Erstelle das finale JSON-Objekt. Füge für jede bewertete Substanzkategorie ein Objekt in das 'substanceCategories'-Array ein. Halte dich strikt an die vorgegebenen Skalenwerte."
+    }
+  ],
+  "ratingDimensions": [
+    {
+      "dimension": "wording",
+      "scale": "Ganzzahlen von -2 bis +2",
+      "definition": "Tonalität der direkten Benennung der Substanz.",
+      "examples": [
+        { "rating": -2, "text": "Gift in meinen Venen." },
+        { "rating": -1, "text": "Drogen machen euch dumm." },
+        { "rating": 0, "text": "Roll' einen Jibbit oder zwei." },
+        { "rating": +1, "text": "Nimm einen Zug und du merkst, es schmeckt lecker." },
+        { "rating": +2, "text": "Hajar macht fett, schmeckt süß wie ein Donut." }
+      ]
+    },
+    {
+      "dimension": "perspective",
+      "scale": "Ganzzahlen von -2 bis +2",
+      "definition": "Wie wird die Substanz durch die formale Erzählweise und Struktur dargestellt? (z.B. Ich-Perspektive, Verurteilung, Aufforderung).",
+      "examples": [
+        { "rating": -2, "text": "Ich hasse diesen Stoff, du weißt, dass ich dich gewarnt hab’." },
+        { "rating": -1, "text": "Bitte lass die Finger von dem Zeug." },
+        { "rating": 0, "text": "Ich weiß, dass sie ein ernsthaftes Drogenproblem hat." },
+        { "rating": +1, "text": "Nehm’ einen Zug und werde high." },
+        { "rating": +2, "text": "Willst du mit mir Drogen nehmen?" }
+      ]
+    },
+    {
+      "dimension": "context",
+      "scale": "Ganzzahlen von -2 bis +2",
+      "definition": "Gezeigte Folgen oder Auswirkungen des Konsums auf die Protagonisten oder ihr Umfeld.",
+      "examples": [
+        { "rating": -2, "text": "Immer nur so viel, dass keiner stirbt..." },
+        { "rating": -1, "text": "Touri kackt ab wegen Koks mit Milchpulver." },
+        { "rating": 0, "text": "Auf’m Sofa, trinke Lean, keine Cola." },
+        { "rating": +1, "text": "Hotpants werden feucht, komm und kauf was von mir." },
+        { "rating": +2, "text": "Die Taschen voll mit Geld wegen Kokain." }
+      ]
+    },
+    {
+      "dimension": "glamorization",
+      "scale": "Ganzzahlen von -2 bis +2",
+      "definition": "Ästhetisierung der Substanz oder des Konsums, Verbindung mit Luxus, Fame oder einem erstrebenswerten Lifestyle.",
+      "examples": [
+        { "rating": -2, "text": "Es riecht wie Terpentin." },
+        { "rating": -1, "text": "... das Pulver ist gestreckt." },
+        { "rating": 0, "text": "Wir rauchen nur pure Joints." },
+        { "rating": +1, "text": "Lila Haze, ich zünd’ den Vapo im Flieger an." },
+        { "rating": +2, "text": "Flieg’ auf die Bahamas wegen Kokain." }
+      ]
+    },
+    {
+      "dimension": "harmAcknowledgement",
+      "scale": "Ganzzahlen von -2 bis 0",
+      "definition": "Explizite Reflexion oder Darstellung von Risiken und Schäden. Positive Werte sind hier nicht möglich.",
+      "examples": [
+        { "rating": -2, "text": "Neunzehnjähriger ließ sich von 'nem Zehntonner überfahren." },
+        { "rating": -1, "text": "Touri kackt ab wegen Koks mit Milchpulver." },
+        { "rating": 0, "text": "So viel Codein hat mich bis jetzt nicht umgebracht..." }
+      ]
+    }
+  ],
+  "substanceCategoriesAndKeywords": [
+    {
+      "category": "Alkohol",
+      "keywords": ["Bier", "Pils", "Wein", "Vino", "Wodka", "Voddi", "Korn", "Gin", "Rum", "Whisky", "Jacky", "Hennessy", "Tequila", "Schnaps", "Kurzer", "Shot", "Jägermeister", "Saufen", "Trinken", "Mische"]
+    },
+    {
+      "category": "Cannabinoide",
+      "keywords": ["Weed", "Gras", "Marihuana", "Hasch", "Ganja", "Bubatz", "Ott", "Jibbit", "Dope", "Haze", "Skunk", "Brokkoli", "Dübel", "Tüte", "Joint", "Blunt", "Kiffen", "Rauchen", "High", "Piece", "Spice"]
+    },
+    {
+      "category": "Stimulanzien",
+      "keywords": ["Pep", "Speed", "Pepp", "Amphetamin", "Crystal", "Tina", "Ice", "Koks", "Coke", "Schnee", "Blow", "Perico", "Crack", "Steine", "Teile", "Ecstasy", "XTC", "MDMA", "Molly", "Emma", "E", "Ziehen", "Sniffen", "Schnupfen", "Werfen", "Poppen"]
+    },
+    {
+      "category": "Opioide",
+      "keywords": ["Heroin", "H", "Brown Sugar", "Smack", "Stoff", "Shore", "Fentanyl", "Fenty", "Tilidin", "Tillys", "Tili", "Codein", "Lean", "Purple Drank", "Sizzurp", "Hustensaft", "Dirty Sprite", "Wok", "Drank", "Ballern", "Drücken"]
+    },
+    {
+      "category": "Sedativa",
+      "keywords": ["Xanax", "Alprazolam", "Xan", "Tafil", "Flunnis", "Benzos", "GHB", "GBL", "Liquid Ecstasy", "G-Juice", "Seife"]
+    },
+    {
+      "category": "Halluzinogene",
+      "keywords": ["LSD", "Acid", "Pappe", "Ticket", "Trips", "Pilze", "Shrooms", "DMT"]
+    },
+    {
+      "category": "Dissoziativa",
+      "keywords": ["Ketamin", "Keta", "Käthe", "Special K", "PCP"]
+    },
+    {
+      "category": "Inhalanzien & Sonstiges",
+      "keywords": ["Lachgas", "Nos", "Ballons", "Poppers", "Rush", "Gas", "Sniffen"]
+    }
+  ]
+}

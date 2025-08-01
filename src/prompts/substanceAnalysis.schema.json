@@ -1,0 +1,80 @@
+{
+  "name": "SubstanceAnalysisResult",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "required": ["substances"],
+    "properties": {
+      "substances": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": [
+            "substanceCategory",
+            "wording",
+            "perspective",
+            "context",
+            "glamorization",
+            "harmAcknowledgement",
+            "substances",
+            "justification"
+          ],
+          "properties": {
+            "substanceCategory": {
+              "type": "string",
+              "enum": [
+                "Alkohol",
+                "Cannabinoide",
+                "Stimulanzien",
+                "Opioide",
+                "Sedativa",
+                "Halluzinogene",
+                "Dissoziativa",
+                "Sonstiges"
+              ]
+            },
+            "wording": {
+              "type": "integer",
+              "minimum": -2,
+              "maximum": 2
+            },
+            "perspective": {
+              "type": "integer",
+              "minimum": -2,
+              "maximum": 2
+            },
+            "context": {
+              "type": "integer",
+              "minimum": -2,
+              "maximum": 2
+            },
+            "glamorization": {
+              "type": "integer",
+              "minimum": -2,
+              "maximum": 2
+            },
+            "harmAcknowledgement": {
+              "type": "integer",
+              "minimum": -2,
+              "maximum": 0
+            },
+            "substances": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "justification": {
+              "type": "string",
+              "maxLength": 300
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "additionalProperties": false
+  }
+}
