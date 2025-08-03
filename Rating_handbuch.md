@@ -6,7 +6,7 @@ Innerhalb des Projekts wird analysiert, ob es einen statistischen Zusammenhang z
 Die Ergebnisse der Studie könnten einen guten Anhaltspunkt bieten, inwieweit aktuelle Suchtpräventionsprogramme der Lebensrealität von Jugendlichen entsprechen, wo noch nachjustiert werden muss oder um blinde Flecke offenzulegen.
 
 Das Projekt wird in drei Phasen durchgeführt. In der ersten Phase wird eine gewisse Menge an Deutschrap-Songtexten systematisch analysiert und auf einer Skala bewertet.
-___Um die entwickelte Skala zu validieren und kalibrieren wird diese Befragung durchgeführt.___
+___Um die entwickelte Skala zu auf ihre Reliabilität zu überprüfen und die Gewichtung zu kalibrieren wird diese Befragung durchgeführt.___
 Sobald die Skala akzeptable Reliabilität und Validität erreicht wird eine große Menge von Songtexten automatisch durch LLMs (Large Language Models, bspw. ChatGPT, Gemini, Copilot) analysiert und bewertet.
 Am Ende liegt für jeden Songtext eine Liste vor von erwähnten Substanzen, sowie ein errechneter Gesamtscore "General Drug Attitude" vor. Ein erster Aufschlag für die Formel zur Berechnung, sowie die Gewichtungen der einzelnen Dimensionen, liegt in diesem Dokument vor - sobald einige
 manuelle Ratings erstellt wurden können diese nachjustiert und kalibriert werden.
