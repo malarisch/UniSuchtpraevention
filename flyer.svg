@@ -10,7 +10,7 @@
    inkscape:version="1.4.2 (ebf0e940, 2025-05-08)"
    sodipodi:docname="flyer.svg"
    xml:space="preserve"
-   inkscape:export-filename="flyer.png"
+   inkscape:export-filename="flyer.pdf"
    inkscape:export-xdpi="600"
    inkscape:export-ydpi="600"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -5565,11 +5565,11 @@
          x="811.08167"
          y="-918.39105"
          transform="scale(1,-1)" /><rect
-         style="fill:#ffffff;stroke-width:1.23689"
+         style="fill:#ffffff;stroke-width:1.27239"
          id="rect4"
-         width="227.68997"
+         width="240.94823"
          height="186.80762"
-         x="811.08167"
+         x="809.49066"
          y="-931.2027"
          transform="scale(1,-1)" /><text
          xml:space="preserve"
@@ -5753,6 +5753,13 @@
          height="9.6034184"
          x="811.45728"
          y="-606.3894"
+         transform="scale(1,-1)" /><rect
+         style="fill:#ffffff;stroke:#ffffff;stroke-width:0.751178;stroke-opacity:0;paint-order:markers fill stroke"
+         id="rect10"
+         width="221.67792"
+         height="128.33989"
+         x="811.04742"
+         y="-608.1474"
          transform="scale(1,-1)" /><text
          xml:space="preserve"
          transform="matrix(0.75000004,0,0,-0.75000004,231.77167,940.12842)"
