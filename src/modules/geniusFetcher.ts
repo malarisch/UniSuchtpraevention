@@ -64,16 +64,17 @@ export async function getSong(id: number | string) {
  * @param {any} params Song object returned by Genius
  * @returns {Promise<object|undefined>} Details about created records
  */
-export async function addSongAndArtistToDatabase(params: any) {
+export async function addSongAndArtistToDatabase(params: any, source: string = "generic") {
     const startTime = Date.now()
     try {
         let DateObj: Date = new Date(params.release_date_for_display)
-
+        params.source = source
         let [Song, songCreated] = await database.Song.findOrCreate({
             where: { geniusId: params.id },
             defaults: {
                 "title": params.title,
                 releaseDate: DateObj,
+                isGoldenSet: false,
                 lyricsState: params.lyrics_state,
                 geniusId: params.id,
                 geniusURL: params.url,
@@ -84,7 +85,7 @@ export async function addSongAndArtistToDatabase(params: any) {
             }
         })
         async function findCreateArtist(artistVal: any): Promise<ArtistArray> {
-            
+            artistVal.source = source
             var [artist, wasCreated] = await database.Artist.findOrCreate({
                 where: {
                     geniusId: artistVal.id

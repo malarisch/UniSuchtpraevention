@@ -37,7 +37,14 @@ const songFetcherQueue = new Worker(
         logger.error(err)
         throw err
       } else {
-        job.data.searchString = job.data.searchString.replace(/[\[][a-zA-Z]*[\]]/ig, "")
+        // split out " - Remaster" tags from spotify in the title
+        let searchString = job.data.searchString.replace(/[\[][a-zA-Z]*[\]]/ig, "");
+        if (searchString.split(" - ").length < 2) {
+          job.data.searchString = searchString = searchString.split(" - ")[0] + searchString.split(" - ")[1]
+        }
+        job.data.searchString = job.data.searchString.replace(/ - /g, " ")
+
+        
         let searchResult = await geniusFetcher.searchSong(job.data.searchString)
         if (searchResult.length == 0) {
           let err = new Error("No Search Results for " + job.data.searchString.replace(/[\[][a-zA-Z]*[\]]/ig, ""))
@@ -51,7 +58,7 @@ const songFetcherQueue = new Worker(
         await job.updateData({ songId: searchResult[sanityCheck?.index ?? 0].result.id })
       }
     }
-    const songAddResult = await geniusFetcher.addSongAndArtistToDatabase(await geniusFetcher.getSong(job.data.songId))
+    const songAddResult = await geniusFetcher.addSongAndArtistToDatabase(await geniusFetcher.getSong(job.data.songId), job.data.source??"generic")
     if (chain) {
       if (!songAddResult?.song?.lyrics) {
         await Queues.QueueList.lyricsFetcherQueue.add(job.name, {

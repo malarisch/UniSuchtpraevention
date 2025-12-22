@@ -79,7 +79,7 @@ const start = async (): Promise<void> => {
     app.use(admin.options.rootPath, adminRouter)
     app.use("/arena", arena)
     app.listen(PORT, () => {
-        logger.info(`AdminJS started on http://localhost:${PORT}${admin.options.rootPath}`)
+        console.log(`AdminJS started on http://localhost:${PORT}${admin.options.rootPath}`)
     })
 }
 

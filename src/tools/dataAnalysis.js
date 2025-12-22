@@ -59,18 +59,30 @@ function calculateMusicStatistics(data) {
     totalEntries: data.length,
     genreCount: {},
     artistCount: {},
-    songCount: {}
+    songCount: {},
+    uniqueArtistList: [],
+    uniqueSongList: [],
+    uniqueGenreList: []
   };
 
   data.forEach(entry => {
     entry.MUSIK.genres.forEach(genre => {
       stats.genreCount[genre] = (stats.genreCount[genre] || 0) + 1;
+      if (!stats.uniqueGenreList.includes(genre)) {
+        stats.uniqueGenreList.push(genre);
+      }
     });
     entry.MUSIK.artists.forEach(artist => {
       stats.artistCount[artist] = (stats.artistCount[artist] || 0) + 1;
+      if (!stats.uniqueArtistList.includes(artist)) {
+        stats.uniqueArtistList.push(artist);
+      }
     });
     entry.MUSIK.songs.forEach(song => {
       stats.songCount[song] = (stats.songCount[song] || 0) + 1;
+      if (!stats.uniqueSongList.includes(song)) {
+        stats.uniqueSongList.push(song);
+      }
     });
   });
 
@@ -420,6 +432,13 @@ function printOverallFindingsReport({ musicStats, participationRates, itemStats,
     console.log(`Unique genres: ${Object.keys(musicStats.genreCount || {}).length}`);
     console.log(`Unique artists: ${Object.keys(musicStats.artistCount || {}).length}`);
     console.log(`Unique songs: ${Object.keys(musicStats.songCount || {}).length}`);
+
+    console.log('Unique genres list:');
+    console.log(`  ${musicStats.uniqueGenreList.join('; ')}`);
+    console.log('Unique artists list:');
+    console.log(`  ${musicStats.uniqueArtistList.join('; ')}`);
+    console.log('Unique songs list:');
+    console.log(`  ${musicStats.uniqueSongList.join('; ')}`);
   }
 
   // Questionnaire items

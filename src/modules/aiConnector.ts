@@ -19,7 +19,7 @@ const logger = await loggerConstructor.logger();
 
 const systemPrompt = await fs.readFile("./src/prompts/substanceAnalysis.txt", "utf8");
 const jsonSchemaOpenAI = JSON.parse(await fs.readFile("./src/prompts/substanceAnalysis.schema.json", "utf8"))
-const sysPromptVer = 2
+const sysPromptVer = 4
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_KEY,
     logger: logger.child({ name: "openai" }),
@@ -39,10 +39,11 @@ export const songAnalysisSchema = z.object(
         ]),
         substances: z.array(z.string()).min(1),
         wording: z.number().min(-2).max(2),
-        perspective: z.number().min(-2).max(2),
+        perspective: z.union([z.number().min(-2).max(2), z.null()]),
         context: z.number().min(-2).max(2),
         glamorization: z.number().min(-2).max(2),
         harmAcknowledgement: z.number().min(-2).max(0),
+        mentions: z.number().int().min(1),
         justification: z.string()
 
 
@@ -59,7 +60,7 @@ type substancesSchema = {
     }
   >;
 }
-const model = "o4-mini"
+const model = "gpt-5-mini-2025-08-07"
 /**
  * Send lyrics to OpenAI and return the parsed rating.
  * @param {string} lyrics Text to analyse
@@ -73,18 +74,20 @@ export async function rateLyrics(lyrics: string): Promise<substancesSchema> {
         model: model,
 
         input: [
+            { role: "developer", content: systemPrompt },
             { role: "user", content: lyrics },
 
         ],
         reasoning: {
-            effort: "medium",
+            effort: "low",
             summary: null
         },
         text: {
             format: zodTextFormat(substancesSchema, "substance_rating_schema"),
         },
+        
     });
-    const p = Point.measurement("aiAnalysis").setTag('sysPromptVer', String(sysPromptVer)).setStringField("model", "gpt-4o")
+    const p = Point.measurement("aiAnalysis").setTag('sysPromptVer', String(sysPromptVer)).setStringField("model", model)
         .setIntegerField("inputTokens", response.usage?.input_tokens)
         .setIntegerField('outputTokens', response.usage?.output_tokens)
         .setIntegerField('totalTokens', response.usage?.total_tokens)
@@ -119,6 +122,7 @@ export async function addRatingToDb(ratings: substancesSchema, songId: number): 
 } catch (e) {
     database.fixSequelizeError(e)
 } finally {
+    
     loggerConstructor.exportTaskTime("addRatingToDb", (Date.now() - startTime))
 
 }

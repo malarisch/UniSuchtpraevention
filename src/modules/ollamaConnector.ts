@@ -43,7 +43,8 @@ export async function checkSearch(inputSearchQuery: any, inputGeniusResult: any)
         messages: messages,
         format: jsonSchema,
         options: {
-            temperature: 0
+            temperature: 0,
+            top_p: 0.2,
         }
     })
     

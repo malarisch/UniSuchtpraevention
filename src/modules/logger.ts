@@ -5,9 +5,9 @@ dotenv.config({path: (!process.env.dotenv ? undefined : process.env.dotenv)});
 
 export async function logger(): Promise<import('pino').Logger> {
     const pino = (await import('pino')).default;
-    console.log("Logging Local: ", process.env.LOGGING_LOCAL)
+    
     if (process.env.LOGGING_LOCAL == "true") {
-
+        console.log("Logging Local: ", process.env.LOGGING_LOCAL)
         return pino({
             level: process.env.LOG_LEVEL || 'debug',
             transport: {
@@ -58,7 +58,14 @@ var localLogger = await logger()
 const influxHost: string = process.env.INFLUXDB_HOST ?? ''
 const influxDatabase: string = process.env.INFLUXDB_DATABASE ?? ''
 const influxToken: string = process.env.INFLUXDB_TOKEN ?? ''
-export const influxClient = new InfluxDBClient({ host: influxHost, token: influxToken, database: influxDatabase })
+let influxClient : InfluxDBClient;
+try {
+    localLogger.info(`Connecting to InfluxDB at ${influxHost}, database: ${influxDatabase}`)
+    influxClient = new InfluxDBClient({ host: influxHost, token: influxToken, database: influxDatabase })
+} catch (e) {
+    localLogger.error("Error connecting to InfluxDB: ", e)
+}
+
 
 export async function writeInflux(points: Point[]) {
     try {

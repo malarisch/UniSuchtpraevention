@@ -32,12 +32,14 @@ import {logger as loggerConstructor} from './logger'
 import {Infer} from "zod/v4";
 const logger = await loggerConstructor()
 
+
+
 const sequelize = new Sequelize(process.env.PG_DB as string, process.env.PG_USER as string, process.env.PG_PASSWORD as string, {
   host: process.env.PG_HOST,
   dialect: 'postgres',
   logging: false
 });
-
+logger.info("Connected to Postgres at ", process.env.PG_HOST, " database: ", process.env.PG_DB)
 
 class Artist extends Model<InferAttributes<Artist>, InferCreationAttributes<Artist>> {
   declare id: number;
@@ -45,6 +47,7 @@ class Artist extends Model<InferAttributes<Artist>, InferCreationAttributes<Arti
   declare meta: object | null;
   declare geniusId: number;
   declare geniusURL: string;
+  declare OHS: number | null;
 
   declare hasSong: HasManyHasAssociationMixin<Song, number>
   declare hasAlbum: HasManyHasAssociationMixin<Album, number>
@@ -62,7 +65,13 @@ Artist.init({
   name: DataTypes.TEXT,
   meta: DataTypes.JSONB,
   geniusId: DataTypes.INTEGER,
-  geniusURL: DataTypes.STRING
+  geniusURL: DataTypes.STRING,
+  
+  OHS: {
+    type: DataTypes.FLOAT,
+    
+    allowNull: true
+  }
 }, { sequelize, modelName: 'artist' });
 
 
@@ -85,7 +94,8 @@ class Song extends Model<InferAttributes<Song>, InferCreationAttributes<Song>> {
   declare hasSubstance: BelongsToManyHasAssociationMixin<Substance, number>
   declare addSubstance: BelongsToManyAddAssociationMixin<Substance, number>
   declare addSubstanceCategory: BelongsToManyAddAssociationMixin<SubstanceCategory, number>
-
+  declare isGoldenSet: boolean;
+  declare OHS: number | null;
 
 }
 Song.init({
@@ -106,9 +116,16 @@ Song.init({
     type: DataTypes.INTEGER,
     allowNull: true
   },
-  intensity_bin: DataTypes.STRING
-  
-
+  intensity_bin: DataTypes.STRING,
+  isGoldenSet: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  OHS: {
+    type: DataTypes.FLOAT,
+    
+    allowNull: true
+  }
 }, { sequelize, modelName: 'song' });
 
 class Album extends Model<InferAttributes<Album>, InferCreationAttributes<Album>> {
@@ -119,7 +136,7 @@ class Album extends Model<InferAttributes<Album>, InferCreationAttributes<Album>
   declare geniusURL: string;
   declare geniusId: number;
   declare meta: object | null;
-
+  declare OHS: number | null;
   declare hasSong: HasManyHasAssociationMixin<Song, number>
   declare addSong: HasManyAddAssociationMixin<Song, number>
 }
@@ -134,6 +151,12 @@ Album.init({
   geniusURL: DataTypes.STRING(512),
   geniusId: DataTypes.INTEGER,
   meta: DataTypes.JSONB
+  ,
+  OHS: {
+    type: DataTypes.FLOAT,
+    
+    allowNull: true
+  }
 }, { sequelize, modelName: 'album' });
 
 class Substance extends Model<InferAttributes<Substance>, InferCreationAttributes<Substance>> {
@@ -269,6 +292,9 @@ class SubstanceRating extends Model<InferAttributes<SubstanceRating>, InferCreat
   declare harmAcknowledgement: number;
   declare sysPromptVer: number;
   declare model: string;
+  declare mentions?: number;
+  
+  declare OHS: number | null;
 }
 SubstanceRating.init({
   id: {
@@ -285,8 +311,16 @@ SubstanceRating.init({
   glamorization: DataTypes.FLOAT,
   harmAcknowledgement: DataTypes.FLOAT,
   sysPromptVer: DataTypes.INTEGER,
-  model: DataTypes.STRING
-}, { sequelize, modelName: 'SubstanceRating' });
+  model: DataTypes.STRING,
+  mentions: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  OHS: {
+    type: DataTypes.FLOAT,
+    
+    allowNull: true
+  }}, { sequelize, modelName: 'SubstanceRating' });
 
 class Artist_Songs extends Model<InferAttributes<Artist_Songs>, InferCreationAttributes<Artist_Songs>> {
   declare isPrimaryArtist: boolean;

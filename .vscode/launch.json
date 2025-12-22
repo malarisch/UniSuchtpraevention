@@ -5,6 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Update OHS",
+            "program": "${workspaceFolder}/cli.ts",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "runtimeExecutable": "tsx",
+            "type": "node",
+            "envFile": "${workspaceFolder}/.envdbg",
+            "args": ["updateOHS"]
+        },
+        {
             "name": "Launch spotifyLyricsScraper",
             "program": "${workspaceFolder}/src/tools/spotifyLyricsScraper.ts",
             "request": "launch",
@@ -14,7 +26,28 @@
             "runtimeExecutable": "tsx",
             "type": "node"
         },
-        
+        {
+            "name": "Launch webserver",
+            "program": "${workspaceFolder}/src/webserver.ts",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "runtimeExecutable": "tsx",
+            "type": "node",
+            "envFile": "${workspaceFolder}/.envdbg"
+        },
+        {
+            "name": "Launch worker",
+            "program": "${workspaceFolder}/src/worker.ts",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "runtimeExecutable": "tsx",
+            "type": "node",
+            "envFile": "${workspaceFolder}/.envdbg"
+        },
 
         {
             "name": "Launch jsonImporter",

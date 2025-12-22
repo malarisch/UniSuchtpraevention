@@ -11,15 +11,17 @@ There may be any number of candidate lines.
 
 Your task:
 1. Compare the INPUT against every candidate.
-2. If exactly one candidate’s artist and song name exactly match INPUT, select it:
+2. Ignore any candidate that is clearly not a song hit, e.g. video transcripts, interviews, podcasts/episodes, commentary, trailers, or similar meta/description text instead of a track listing.
+3. A match only counts if you are confident the artist and song name refer to the same track as INPUT (allow only minor punctuation or dash differences). If INPUT specifies a remix/remaster/alternate version, you may match the base song title (same artist) even if the version tag is missing, but only when it is clearly the same track. Do **not** select partial/ambiguous matches or guesses.
+4. If exactly one valid candidate matches, select it:
    - `index`: the 0-based index of that candidate  
    - `isFirst`: `true` if `index == 0`, otherwise `false`  
    - `isNone`: `false`
-3. If none match, then:
+5. If none match confidently, then:
    - `index`: `-1`  
    - `isFirst`: `false`  
    - `isNone`: `true`
-4. Output **only** a single JSON object, with **no** extra text or formatting, e.g.:
+6. Output **only** a single JSON object, with **no** extra text or formatting, e.g.:
 
    {"index":2,"isFirst":false,"isNone":false}
 

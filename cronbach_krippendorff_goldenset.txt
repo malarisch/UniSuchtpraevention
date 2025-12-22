@@ -1,0 +1,14 @@
+=== Reliability metrics ===
+Input: /home/wolff/UniSuchtpraevention/goldenSetRated_withoutLyrics.csv
+Grouping (units): song+category (default song+category)
+Rater key for Krippendorff: ratingId (ratingId|model)
+
+Cronbach's alpha (across dimensions; unit means across raters):
+  units_used=40 | alpha=0.8927
+
+Krippendorff's alpha (interval; per dimension):
+  wording: alpha=0.5856 | Do=0.3848 | De=0.9286 | units=40 | values=208
+  perspective: alpha=0.7816 | Do=0.3043 | De=1.3935 | units=40 | values=206
+  context: alpha=0.7034 | Do=0.7922 | De=2.6707 | units=40 | values=208
+  glamorization: alpha=0.7696 | Do=0.3333 | De=1.4470 | units=40 | values=208
+  harmAcknowledgement: alpha=0.7968 | Do=0.0885 | De=0.4353 | units=40 | values=208
