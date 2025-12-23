@@ -176,8 +176,36 @@ program.command("distillGoldenSetForLimeSurvey")
 
 
     })
+
 program
-    .command('checkAiAnalyses')
+    .command('addAiAnalysisJobs')
+    .description('Enqueue AI analysis jobs for the entire set')
+    .action(async () => {
+        try {
+            logger.info('Syncing Database...');
+            await database.sync();
+            logger.info('Database synced.');
+
+            logger.info('Fetching all songs...');
+            const songs = await Song.findAll();
+            logger.info(`Fetched ${songs.length} songs from the database.`);
+
+            logger.info('Enqueuing AI analysis jobs for all songs...');
+            for (const song of songs) {
+                await QueueList.aiAnalysisQueue.add('aiAnalysis', {
+                    internalId: song.id,
+                });
+                logger.info(`Job enqueued for Song ID: ${song.id}, Title: "${song.title}"`);
+            }
+            logger.info('Jobs for all songs have been successfully enqueued.');
+        } catch (error) {
+            logger.error('An error occurred while enqueuing AI analysis jobs:', error);
+        } finally {
+            process.exit(0);
+        }
+    });
+program
+    .command('checkAiAnalysis')
     .description('Check which songs already have AI annotations and enqueue jobs for missing ones.')
     .action(async () => {
         try {
@@ -388,14 +416,14 @@ program
     });
 
 
-function calcOHS(wording: number, perspective: number, context: number, glamorization: number, harmAck: number, mentions?: number): number {
+function calcOHS(perspective: number, context: number, glamorization: number, harmAck: number, mentions?: number): number {
     // Example calculation (weights can be adjusted as needed)
     const ohs =(
-        (wording * 0.2) +
-        (perspective * 0.25) +
-        (context * 0.20) +
-        (glamorization * 0.15) +
-        (harmAck * 0.4)) * (mentions ?  -((1 / (1 + Math.exp(5*(mentions - 1))))*3)+3 : 1);
+        //(wording * 0.2) +
+        (perspective * 0.35) +
+        (context * 0.10) +
+        (glamorization * 0.5) +
+        (harmAck * 0.2))// * (mentions ?? 1) //*  (mentions ?  -((1 / (1 + Math.exp(5*(mentions - 1))))*3)+3 : 1);
     return parseFloat(ohs.toFixed(3)); // Round to 3 decimal places
 }
 
@@ -444,23 +472,23 @@ program.command("updateOHS")
                     const substanceCountSong = await database.SubstanceCategories_Songs.findOne({ where: { [Op.and]: [{ songId: song.id }, { SubstanceCategoryId: substanceCategoryId }] } });
 
                     const ohs = calcOHS(
-                        individualRating.wording,
+                        //individualRating.wording,
                         individualRating.perspective,
                         individualRating.context,
                         individualRating.glamorization,
                         individualRating.harmAcknowledgement,
-                        (substanceCountSong ? substanceCountSong.locations.length : 1)
+                        individualRating.mentions
                         
                     );
                     individualRating.OHS = ohs;
                     await individualRating.save();
                     totalOHS += ohs;
-                    logger.info(`Calculated OHS for Song ID ${song.id} (${song.title}): ${ohs} based on Substance Category ID ${substanceCategoryId} (${substanceCatName})`);
+                    //logger.info(`Calculated OHS for Song ID ${song.id} (${song.title}): ${ohs} based on Substance Category ID ${substanceCategoryId} (${substanceCatName})`);
                 }
 
             const avgOHS = totalOHS / (song.SubstanceRatings?.length || 0);
             song.OHS = parseFloat(avgOHS.toFixed(3));
-            logger.info(`Updating Song ID ${song.id} (${song.title}) with average OHS: ${song.OHS}`);
+            //logger.info(`Updating Song ID ${song.id} (${song.title}) with average OHS: ${song.OHS}`);
             await song.save();
             }
 
@@ -496,11 +524,12 @@ program.command("updateOHS")
             if (countedSongs > 0) {
                 const avgArtistOHS = totalArtistOHS / countedSongs;
                 artist.OHS = parseFloat(avgArtistOHS.toFixed(3));
-                logger.info(`Updating Artist ID ${artist.id} (${artist.name}) with average OHS: ${artist.OHS}`);
+                //logger.info(`Updating Artist ID ${artist.id} (${artist.name}) with average OHS: ${artist.OHS}`);
                 await artist.save();
             }
         }
         artistProgressBar.stop();
+        process.exit(0);
     });
 
 

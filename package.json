@@ -38,6 +38,7 @@
     "@adminjs/sequelize": "^4.1.1",
     "@influxdata/influxdb3-client": "^1.1.0",
     "@sequelize/postgres": "^7.0.0-alpha.46",
+    "@stdlib/stdlib": "^0.3.2",
     "@vanillaes/csv": "^3.0.4",
     "adminjs": "^7.8.17",
     "ansi-colors": "^4.1.3",

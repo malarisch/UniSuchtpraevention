@@ -2,54 +2,152 @@ import csv from 'csv-parser'
 import fs from 'fs'
 import path from 'path'
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas'
+import { database, logger as loggerConstructor, substanceTagger } from '@suchtModules/index'
+import dotenv from "dotenv"; dotenv.config({ path: (!process.env.dotenv ? undefined : process.env.dotenv) });
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const tcdf = require('@stdlib/stats/base/dists/t/cdf');
+
+await database.sync();
+
+
+// OHS Künstler Auswertung
+// Ruft das arithmetische Mittel der OHS-Werte aller Künstler eines music Objekts ab
+async function getOHSArtists(music, artistCache = null) {
+  if (!music || !Array.isArray(music.artists) || music.artists.length === 0) {
+    console.log ('No artists found in music object:', music);
+    return null;
+  };
+  let ohsSum = 0;
+  let count = 0;
+  for (const artist of music.artists) {
+    let artistData = artistCache?.get(artist);
+    if (!artistData) {
+      artistData = await database.Artist.findOne({ where: { name: artist } });
+      if (artistCache) artistCache.set(artist, artistData);
+    }
+    if (!artistData || !Number.isFinite(artistData.OHS)) continue;
+    ohsSum += artistData.OHS;
+    count += 1;
+  }
+  if (count === 0) return null;
+  return ohsSum / count;
+}
+
+// OHS Fragebogen Auswertung - input ist eine Line aus dem CSV
+function calculteOHS_FragebogenAntwort(line) {
+  let score = 0;
+  if (line['A1[AAlk]'] == '0') score += 2;
+  else if (line['A1[AAlk]'] == '1') score += 1;
+  else if (line['A1[AAlk]'] == '2') score += 0;
+  if (line['A1[ACan]'] == '0') score += 2;
+  else if (line['A1[ACan]'] == '1') score += 1;
+  else if (line['A1[ACan]'] == '2') score += 0;
+  if (line['A1[AStim]'] == '0') score += 2;
+  else if (line['A1[AStim]'] == '1') score += 1;
+  else if (line['A1[AStim]'] == '2') score += 0;
+  if (line['A1[ASed]'] == '0') score += 2;
+  else if (line['A1[ASed]'] == '1') score += 1;
+  else if (line['A1[ASed]'] == '2') score += 0;
+  if (line['A1[AAna]'] == '0') score += 2;
+  else if (line['A1[AAna]'] == '1') score += 1;
+  else if (line['A1[AAna]'] == '2') score += 0;
+  function B(i) {
+    let score = 0;
+      if (line['B'+ i +'[SQ001]'] == '-2') score += 0;
+      if (line['B'+ i +'[SQ001]'] == '-1') score += 1;
+      if (line['B'+ i +'[SQ001]'] == '0') score += 2;
+      if (line['B'+ i +'[SQ001]'] == '1') score += 3;
+      if (line['B'+ i +'[SQ001]'] == '2') score += 4;
+      if (line['B'+ i +'[SQ002]'] == '-2') score += 4;
+      if (line['B'+ i +'[SQ002]'] == '-1') score += 3;
+      if (line['B'+ i +'[SQ002]'] == '0') score += 2;
+      if (line['B'+ i +'[SQ002]'] == '1') score += 1;
+      if (line['B'+ i +'[SQ002]'] == '2') score += 0;
+    return score;
+  }
+  score += B('1');
+  score += B('2');
+  score += B('3');
+  score += B('4');
+  score += B('5');
+
+  if (line['R1[RCan]'] == '3') score += 0;
+  else if (line['R1[RCan]'] == '2') score += 1;
+  else if (line['R1[RCan]'] == '1') score += 2;
+  else if (line['R1[RCan]'] == '0') score += 3;
+
+  if (line['R1[RAlk]'] == '3') score += 0;
+  else if (line['R1[RAlk]'] == '2') score += 1;
+  else if (line['R1[RAlk]'] == '1') score += 2;
+  else if (line['R1[RAlk]'] == '0') score += 3;
+  
+  if (line['R1[RSti]'] == '3') score += 0;
+  else if (line['R1[RSti]'] == '2') score += 1;
+  else if (line['R1[RSti]'] == '1') score += 2;
+  else if (line['R1[RSti]'] == '0') score += 3;
+  
+  return score;
+
+
+  
+  
+}
 
 
 const inputData = [];
 fs.createReadStream('ergebnisse.csv')
   .pipe(csv())
   .on('data', (data) => inputData.push(data))
-  .on('end', () => {
+  .on('end', async () => {
     
-    for (var i in inputData) {
-      const music = {"genres": [], "artists": [], "songs": []};
-      const splitMusic = inputData[i].MUSIK.split('; ');
-      for (var j in splitMusic) {
-        if (splitMusic[j].startsWith('a:')) {
-        music.artists.push(splitMusic[j].substring(2));
-        } else if (splitMusic[j].startsWith('g:')) {
-        music.genres.push(splitMusic[j].substring(2));
-        } else if (splitMusic[j].startsWith('a-s:')) {
-        music.artists.push(splitMusic[j].substring(4).split(' - ')[0]);
-        music.songs.push(splitMusic[j].substring(4));
+    try {
+      for (var i in inputData) {
+        const music = {"genres": [], "artists": [], "songs": []};
+        const splitMusic = inputData[i].MUSIK.split('; ');
+        for (var j in splitMusic) {
+          if (splitMusic[j].startsWith('a:')) {
+          music.artists.push(splitMusic[j].substring(2));
+          } else if (splitMusic[j].startsWith('g:')) {
+          music.genres.push(splitMusic[j].substring(2));
+          } else if (splitMusic[j].startsWith('a-s:')) {
+          music.artists.push(splitMusic[j].substring(4).split(' - ')[0]);
+          music.songs.push(splitMusic[j].substring(4));
 
+          }
         }
+        inputData[i].MUSIK = music;
       }
-      inputData[i].MUSIK = music;
-    }
-    const musicStats = calculateMusicStatistics(inputData);
-    const participationRates = calculateParticipationRates(inputData);
-    const itemStats = calculateItemStatistics(inputData);
-    const itemCorrelations = calculateItemCorrelations(inputData);
-    const significantFindings = extractSignificantFindings({ itemStats, itemCorrelations });
-    // Pretty overall report (keeps console output readable)
-    printOverallFindingsReport({
-      musicStats,
-      participationRates,
-      itemStats,
-      itemCorrelations,
-      significantFindings
-    });
 
-    // Generate plots for the most significant findings
-    generatePlotsForSignificantFindings({
-      data: inputData,
-      itemStats,
-      itemCorrelations,
-      findings: significantFindings,
-      outDir: path.resolve('plots')
-    }).catch(err => {
-      console.error('Plot generation failed:', err);
-    });
+
+      const musicStats = calculateMusicStatistics(inputData);
+      const participationRates = calculateParticipationRates(inputData);
+      const itemStats = calculateItemStatistics(inputData);
+      const itemCorrelations = calculateItemCorrelations(inputData);
+      const artistVsSurveyOhs = await correlateArtistOhsWithSurveyOhs(inputData);
+      const significantFindings = extractSignificantFindings({ itemStats, itemCorrelations });
+      // Pretty overall report (keeps console output readable)
+      printOverallFindingsReport({
+        musicStats,
+        participationRates,
+        itemStats,
+        itemCorrelations,
+        significantFindings,
+        artistVsSurveyOhs
+      });
+
+      // Generate plots for the most significant findings
+      await generatePlotsForSignificantFindings({
+        data: inputData,
+        itemStats,
+        itemCorrelations,
+        findings: significantFindings,
+        outDir: path.resolve('plots')
+      });
+    } catch (err) {
+      console.error('Analysis failed:', err);
+    }
   });
 
 
@@ -307,6 +405,16 @@ function pearsonCorrelation(x, y) {
   return num / Math.sqrt(dx * dy);
 }
 
+function pValueFromCorrelation(r, n) {
+  if (!Number.isFinite(r) || !Number.isFinite(n) || n < 3 || Math.abs(r) >= 1) return null;
+  const df = n - 2;
+  const t = Math.abs(r) * Math.sqrt(df / (1 - r * r));
+  const cdfVal = tcdf(t, df);
+  if (!Number.isFinite(cdfVal)) return null;
+  const p = 2 * (1 - cdfVal);
+  return Math.max(0, Math.min(1, p));
+}
+
 function correlationRatioEtaSquared(categories, values) {
   // Eta-squared for categorical categories vs numeric values.
   if (!Array.isArray(categories) || !Array.isArray(values) || categories.length !== values.length) return null;
@@ -333,6 +441,25 @@ function correlationRatioEtaSquared(categories, values) {
   }
   if (ssTotal === 0) return null;
   return ssBetween / ssTotal;
+}
+
+async function correlateArtistOhsWithSurveyOhs(data) {
+  const artistOhs = [];
+  const surveyOhs = [];
+  const artistCache = new Map();
+
+  for (const row of data) {
+    const questionnaireOhs = calculteOHS_FragebogenAntwort(row);
+    const music = row?.MUSIK;
+    if (!music || !Array.isArray(music.artists) || music.artists.length === 0) continue;
+    const artistAvgOhs = await getOHSArtists(music, artistCache);
+    if (!Number.isFinite(questionnaireOhs) || !Number.isFinite(artistAvgOhs)) continue;
+    artistOhs.push(artistAvgOhs);
+    surveyOhs.push(questionnaireOhs);
+  }
+
+  const r = pearsonCorrelation(artistOhs, surveyOhs);
+  return { n: artistOhs.length, r, p: pValueFromCorrelation(r, artistOhs.length) };
 }
 
 function calculateItemCorrelations(data) {
@@ -400,7 +527,7 @@ function formatNumber(value, digits = 3) {
   return value.toFixed(digits);
 }
 
-function printOverallFindingsReport({ musicStats, participationRates, itemStats, itemCorrelations, significantFindings }) {
+function printOverallFindingsReport({ musicStats, participationRates, itemStats, itemCorrelations, significantFindings, artistVsSurveyOhs }) {
   console.log('\n==============================');
   console.log(' UniSuchtprävention — Findings');
   console.log('==============================\n');
@@ -439,6 +566,20 @@ function printOverallFindingsReport({ musicStats, participationRates, itemStats,
     console.log(`  ${musicStats.uniqueArtistList.join('; ')}`);
     console.log('Unique songs list:');
     console.log(`  ${musicStats.uniqueSongList.join('; ')}`);
+  }
+
+  if (artistVsSurveyOhs) {
+    console.log('\n## OHS correlation (artists listened vs questionnaire)');
+    const n = artistVsSurveyOhs.n ?? 0;
+    const r = artistVsSurveyOhs.r;
+    const p = artistVsSurveyOhs.p;
+    if (!n || !Number.isFinite(r)) {
+      console.log('Not enough paired OHS data to compute correlation.');
+    } else {
+      const sign = r >= 0 ? '+' : '';
+      const pStr = Number.isFinite(p) ? formatNumber(p, 4) : 'n/a';
+      console.log(`n=${n} | r=${sign}${formatNumber(r)} | p=${pStr}`);
+    }
   }
 
   // Questionnaire items
