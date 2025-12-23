@@ -7,7 +7,7 @@ import dotenv from "dotenv"; dotenv.config({ path: (!process.env.dotenv ? undefi
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
-const tcdf = require('@stdlib/stats/base/dists/t/cdf');
+const pcorrtest = require('@stdlib/stats/pcorrtest');
 
 await database.sync();
 
@@ -37,35 +37,40 @@ async function getOHSArtists(music, artistCache = null) {
 
 // OHS Fragebogen Auswertung - input ist eine Line aus dem CSV
 function calculteOHS_FragebogenAntwort(line) {
+  const parseIntField = (key) => {
+    const raw = line?.[key];
+    if (raw === undefined || raw === null) return null;
+    const num = Number.parseInt(String(raw).trim(), 10);
+    return Number.isNaN(num) ? null : num;
+  };
+  const mapA = { 0: 2, 1: 1, 2: 0 };
+  const mapBPos = { '-2': 0, '-1': 1, 0: 2, 1: 3, 2: 4 };
+  const mapBNeg = { '-2': 4, '-1': 3, 0: 2, 1: 1, 2: 0 };
+  const mapR = { 3: 0, 2: 1, 1: 2, 0: 3 };
+
   let score = 0;
-  if (line['A1[AAlk]'] == '0') score += 2;
-  else if (line['A1[AAlk]'] == '1') score += 1;
-  else if (line['A1[AAlk]'] == '2') score += 0;
-  if (line['A1[ACan]'] == '0') score += 2;
-  else if (line['A1[ACan]'] == '1') score += 1;
-  else if (line['A1[ACan]'] == '2') score += 0;
-  if (line['A1[AStim]'] == '0') score += 2;
-  else if (line['A1[AStim]'] == '1') score += 1;
-  else if (line['A1[AStim]'] == '2') score += 0;
-  if (line['A1[ASed]'] == '0') score += 2;
-  else if (line['A1[ASed]'] == '1') score += 1;
-  else if (line['A1[ASed]'] == '2') score += 0;
-  if (line['A1[AAna]'] == '0') score += 2;
-  else if (line['A1[AAna]'] == '1') score += 1;
-  else if (line['A1[AAna]'] == '2') score += 0;
+  let missing = false;
+
+  const addMapped = (map, key) => {
+    const v = parseIntField(key);
+    if (v === null || !(v in map)) {
+      missing = true;
+      return 0;
+    }
+    return map[v];
+  };
+
+  score += addMapped(mapA, 'A1[AAlk]');
+  score += addMapped(mapA, 'A1[ACan]');
+  score += addMapped(mapA, 'A1[AStim]');
+  score += addMapped(mapA, 'A1[ASed]');
+  score += addMapped(mapA, 'A1[AAna]');
   function B(i) {
-    let score = 0;
-      if (line['B'+ i +'[SQ001]'] == '-2') score += 0;
-      if (line['B'+ i +'[SQ001]'] == '-1') score += 1;
-      if (line['B'+ i +'[SQ001]'] == '0') score += 2;
-      if (line['B'+ i +'[SQ001]'] == '1') score += 3;
-      if (line['B'+ i +'[SQ001]'] == '2') score += 4;
-      if (line['B'+ i +'[SQ002]'] == '-2') score += 4;
-      if (line['B'+ i +'[SQ002]'] == '-1') score += 3;
-      if (line['B'+ i +'[SQ002]'] == '0') score += 2;
-      if (line['B'+ i +'[SQ002]'] == '1') score += 1;
-      if (line['B'+ i +'[SQ002]'] == '2') score += 0;
-    return score;
+    const v1 = parseIntField('B' + i + '[SQ001]');
+    const v2 = parseIntField('B' + i + '[SQ002]');
+    if (v1 === null || !(v1 in mapBPos)) missing = true;
+    if (v2 === null || !(v2 in mapBNeg)) missing = true;
+    return (v1 in mapBPos ? mapBPos[v1] : 0) + (v2 in mapBNeg ? mapBNeg[v2] : 0);
   }
   score += B('1');
   score += B('2');
@@ -73,22 +78,11 @@ function calculteOHS_FragebogenAntwort(line) {
   score += B('4');
   score += B('5');
 
-  if (line['R1[RCan]'] == '3') score += 0;
-  else if (line['R1[RCan]'] == '2') score += 1;
-  else if (line['R1[RCan]'] == '1') score += 2;
-  else if (line['R1[RCan]'] == '0') score += 3;
-
-  if (line['R1[RAlk]'] == '3') score += 0;
-  else if (line['R1[RAlk]'] == '2') score += 1;
-  else if (line['R1[RAlk]'] == '1') score += 2;
-  else if (line['R1[RAlk]'] == '0') score += 3;
+  score += addMapped(mapR, 'R1[RCan]');
+  score += addMapped(mapR, 'R1[RAlk]');
+  score += addMapped(mapR, 'R1[RSti]');
   
-  if (line['R1[RSti]'] == '3') score += 0;
-  else if (line['R1[RSti]'] == '2') score += 1;
-  else if (line['R1[RSti]'] == '1') score += 2;
-  else if (line['R1[RSti]'] == '0') score += 3;
-  
-  return score;
+  return missing ? null : score;
 
 
   
@@ -126,7 +120,10 @@ fs.createReadStream('ergebnisse.csv')
       const itemStats = calculateItemStatistics(inputData);
       const itemCorrelations = calculateItemCorrelations(inputData);
       const artistVsSurveyOhs = await correlateArtistOhsWithSurveyOhs(inputData);
+      const questionnaireOhsVsAge = correlateQuestionnaireOhsWithAge(inputData);
+      const musicOhsVsAge = await correlateMusicOhsWithAge(inputData);
       const significantFindings = extractSignificantFindings({ itemStats, itemCorrelations });
+      const plotDir = path.resolve('plots');
       // Pretty overall report (keeps console output readable)
       printOverallFindingsReport({
         musicStats,
@@ -134,7 +131,9 @@ fs.createReadStream('ergebnisse.csv')
         itemStats,
         itemCorrelations,
         significantFindings,
-        artistVsSurveyOhs
+        artistVsSurveyOhs,
+        questionnaireOhsVsAge,
+        musicOhsVsAge
       });
 
       // Generate plots for the most significant findings
@@ -143,8 +142,16 @@ fs.createReadStream('ergebnisse.csv')
         itemStats,
         itemCorrelations,
         findings: significantFindings,
-        outDir: path.resolve('plots')
+        outDir: plotDir
       });
+
+      await generateOhsCorrelationPlots({
+        artistCorrelation: artistVsSurveyOhs,
+        questionnaireAgeCorrelation: questionnaireOhsVsAge,
+        musicAgeCorrelation: musicOhsVsAge,
+        outDir: plotDir
+      });
+      process.exit(0);
     } catch (err) {
       console.error('Analysis failed:', err);
     }
@@ -377,42 +384,42 @@ function calculateItemStatistics(data) {
   return { keys, global, byGender };
 }
 
-function pearsonCorrelation(x, y) {
-  // Returns Pearson r for paired arrays x,y.
-  if (!Array.isArray(x) || !Array.isArray(y) || x.length !== y.length) return null;
-  const pairs = [];
-  for (let i = 0; i < x.length; i++) {
-    const xi = x[i];
-    const yi = y[i];
-    if (Number.isFinite(xi) && Number.isFinite(yi)) pairs.push([xi, yi]);
-  }
-  if (pairs.length < 2) return null;
-  const xs = pairs.map(p => p[0]);
-  const ys = pairs.map(p => p[1]);
-  const mx = mean(xs);
-  const my = mean(ys);
-  let num = 0;
-  let dx = 0;
-  let dy = 0;
-  for (let i = 0; i < pairs.length; i++) {
-    const a = xs[i] - mx;
-    const b = ys[i] - my;
-    num += a * b;
-    dx += a * a;
-    dy += b * b;
-  }
-  if (dx === 0 || dy === 0) return null;
-  return num / Math.sqrt(dx * dy);
-}
 
-function pValueFromCorrelation(r, n) {
-  if (!Number.isFinite(r) || !Number.isFinite(n) || n < 3 || Math.abs(r) >= 1) return null;
+function correlationStats(xValues, yValues) {
+  if (!Array.isArray(xValues) || !Array.isArray(yValues) || xValues.length !== yValues.length) {
+    return { n: 0, r: null, rSquared: null, t: null, df: null, p: null, ciLower: null, ciUpper: null, meanX: null, meanY: null, medianX: null, medianY: null };
+  }
+  const xs = [];
+  const ys = [];
+  for (let i = 0; i < xValues.length; i++) {
+    const xv = xValues[i];
+    const yv = yValues[i];
+    if (Number.isFinite(xv) && Number.isFinite(yv)) {
+      xs.push(xv);
+      ys.push(yv);
+    }
+  }
+  const n = xs.length;
+  if (n < 4) return { n, r: null, rSquared: null, t: null, df: null, p: null, ciLower: null, ciUpper: null, meanX: mean(xs), meanY: mean(ys), medianX: median(xs), medianY: median(ys) };
+  const test = pcorrtest(xs, ys, { alpha: 0.05, alternative: 'two-sided', rho: 0 });
+  const r = test?.pcorr;
+  const ci = Array.isArray(test?.ci) ? { lower: test.ci[0], upper: test.ci[1] } : { lower: null, upper: null };
+  const stat = test?.statistic;
   const df = n - 2;
-  const t = Math.abs(r) * Math.sqrt(df / (1 - r * r));
-  const cdfVal = tcdf(t, df);
-  if (!Number.isFinite(cdfVal)) return null;
-  const p = 2 * (1 - cdfVal);
-  return Math.max(0, Math.min(1, p));
+  return {
+    n,
+    r,
+    rSquared: Number.isFinite(r) ? r * r : null,
+    t: Number.isFinite(stat) ? stat : null,
+    df,
+    p: Number.isFinite(test?.pValue) ? test.pValue : null,
+    ciLower: ci.lower,
+    ciUpper: ci.upper,
+    meanX: mean(xs),
+    meanY: mean(ys),
+    medianX: median(xs),
+    medianY: median(ys)
+  };
 }
 
 function correlationRatioEtaSquared(categories, values) {
@@ -446,20 +453,101 @@ function correlationRatioEtaSquared(categories, values) {
 async function correlateArtistOhsWithSurveyOhs(data) {
   const artistOhs = [];
   const surveyOhs = [];
+  const pairs = [];
   const artistCache = new Map();
+  const perGender = {
+    m: { artist: [], survey: [], pairs: [] },
+    w: { artist: [], survey: [], pairs: [] }
+  };
+  const exclusions = [];
 
-  for (const row of data) {
+  for (let idx = 0; idx < data.length; idx++) {
+    const row = data[idx];
     const questionnaireOhs = calculteOHS_FragebogenAntwort(row);
     const music = row?.MUSIK;
-    if (!music || !Array.isArray(music.artists) || music.artists.length === 0) continue;
+    if (!music || !Array.isArray(music.artists) || music.artists.length === 0) {
+      exclusions.push({ index: idx, reason: 'no artists parsed', row });
+      continue;
+    }
     const artistAvgOhs = await getOHSArtists(music, artistCache);
-    if (!Number.isFinite(questionnaireOhs) || !Number.isFinite(artistAvgOhs)) continue;
+    if (!Number.isFinite(questionnaireOhs)) {
+      exclusions.push({ index: idx, reason: 'invalid questionnaire OHS', row });
+      continue;
+    }
+    if (!Number.isFinite(artistAvgOhs)) {
+      exclusions.push({ index: idx, reason: 'missing artist OHS', row });
+      continue;
+    }
     artistOhs.push(artistAvgOhs);
     surveyOhs.push(questionnaireOhs);
+    const gender = row?.GENDER ? String(row.GENDER).trim().toLowerCase() : null;
+    pairs.push({ x: questionnaireOhs, y: artistAvgOhs, gender });
+    if (gender === 'm' || gender === 'w') {
+      perGender[gender].artist.push(artistAvgOhs);
+      perGender[gender].survey.push(questionnaireOhs);
+      perGender[gender].pairs.push({ x: questionnaireOhs, y: artistAvgOhs, gender });
+    }
   }
 
-  const r = pearsonCorrelation(artistOhs, surveyOhs);
-  return { n: artistOhs.length, r, p: pValueFromCorrelation(r, artistOhs.length) };
+  const overall = correlationStats(artistOhs, surveyOhs);
+  const byGender = {
+    m: correlationStats(perGender.m.artist, perGender.m.survey),
+    w: correlationStats(perGender.w.artist, perGender.w.survey)
+  };
+  return {
+    ...overall,
+    byGender,
+    exclusions,
+    pairs,
+    pairsByGender: { m: perGender.m.pairs, w: perGender.w.pairs }
+  };
+}
+
+function correlateQuestionnaireOhsWithAge(data) {
+  const ages = [];
+  const qOhs = [];
+  const pairs = [];
+  const exclusions = [];
+  data.forEach((row, idx) => {
+    const age = toNumber(row?.AGE);
+    const q = calculteOHS_FragebogenAntwort(row);
+    if (!Number.isFinite(age) || !Number.isFinite(q)) {
+      exclusions.push({ index: idx, reason: 'missing age or questionnaire OHS', row });
+      return;
+    }
+    ages.push(age);
+    qOhs.push(q);
+    pairs.push({ x: age, y: q });
+  });
+  const stats = correlationStats(ages, qOhs);
+  return { ...stats, pairs, exclusions };
+}
+
+async function correlateMusicOhsWithAge(data) {
+  const ages = [];
+  const musicOhs = [];
+  const pairs = [];
+  const exclusions = [];
+  const artistCache = new Map();
+  for (let idx = 0; idx < data.length; idx++) {
+    const row = data[idx];
+    const age = toNumber(row?.AGE);
+    const music = row?.MUSIK;
+    if (!Number.isFinite(age) || !music || !Array.isArray(music.artists) || music.artists.length === 0) {
+      exclusions.push({ index: idx, reason: 'missing age or artists', row });
+      continue;
+    }
+    const artistAvgOhs = await getOHSArtists(music, artistCache);
+    if (!Number.isFinite(artistAvgOhs)) {
+      exclusions.push({ index: idx, reason: 'missing artist OHS', row });
+      continue;
+    }
+    ages.push(age);
+    musicOhs.push(artistAvgOhs);
+    pairs.push({ x: age, y: artistAvgOhs });
+  }
+  const stats = correlationStats(ages, musicOhs);
+  return { ...stats, pairs, exclusions };
 }
 
 function calculateItemCorrelations(data) {
@@ -495,9 +583,13 @@ function calculateItemCorrelations(data) {
       genderCats.push(g);
     });
 
+    const ageStats = correlationStats(itemVals, ages);
     global[key] = {
-      n: itemVals.filter(v => v !== null).length,
-      r_age: pearsonCorrelation(itemVals, ages),
+      n: ageStats.n,
+      r_age: ageStats.r,
+      p_age: ageStats.p,
+      ci_age_lower: ageStats.ciLower,
+      ci_age_upper: ageStats.ciUpper,
       eta2_gender: correlationRatioEtaSquared(genderCats, itemVals)
     };
 
@@ -511,9 +603,13 @@ function calculateItemCorrelations(data) {
           gItem.push(toNumber(r[key]));
           gAge.push(toNumber(r.AGE));
         });
+      const gStats = correlationStats(gItem, gAge);
       byGender[g][key] = {
-        n: gItem.filter(v => v !== null).length,
-        r_age: pearsonCorrelation(gItem, gAge)
+        n: gStats.n,
+        r_age: gStats.r,
+        p_age: gStats.p,
+        ci_age_lower: gStats.ciLower,
+        ci_age_upper: gStats.ciUpper
       };
     }
   }
@@ -527,7 +623,7 @@ function formatNumber(value, digits = 3) {
   return value.toFixed(digits);
 }
 
-function printOverallFindingsReport({ musicStats, participationRates, itemStats, itemCorrelations, significantFindings, artistVsSurveyOhs }) {
+function printOverallFindingsReport({ musicStats, participationRates, itemStats, itemCorrelations, significantFindings, artistVsSurveyOhs, questionnaireOhsVsAge, musicOhsVsAge }) {
   console.log('\n==============================');
   console.log(' UniSuchtprävention — Findings');
   console.log('==============================\n');
@@ -564,21 +660,108 @@ function printOverallFindingsReport({ musicStats, participationRates, itemStats,
     console.log(`  ${musicStats.uniqueGenreList.join('; ')}`);
     console.log('Unique artists list:');
     console.log(`  ${musicStats.uniqueArtistList.join('; ')}`);
-    console.log('Unique songs list:');
-    console.log(`  ${musicStats.uniqueSongList.join('; ')}`);
+  console.log('Unique songs list:');
+  console.log(`  ${musicStats.uniqueSongList.join('; ')}`);
   }
 
   if (artistVsSurveyOhs) {
     console.log('\n## OHS correlation (artists listened vs questionnaire)');
-    const n = artistVsSurveyOhs.n ?? 0;
-    const r = artistVsSurveyOhs.r;
-    const p = artistVsSurveyOhs.p;
+    const printCorr = (label, stats) => {
+      const n = stats?.n ?? 0;
+      const r = stats?.r;
+      const p = stats?.p;
+      const t = stats?.t;
+      const df = stats?.df;
+      const r2 = stats?.rSquared;
+      const ciL = stats?.ciLower;
+      const ciU = stats?.ciUpper;
+      if (!n || !Number.isFinite(r)) {
+        console.log(`  ${label}: Not enough paired OHS data.`);
+        return;
+      }
+      const meanX = Number.isFinite(stats?.meanX) ? formatNumber(stats.meanX) : 'n/a';
+      const meanY = Number.isFinite(stats?.meanY) ? formatNumber(stats.meanY) : 'n/a';
+      const medX = Number.isFinite(stats?.medianX) ? formatNumber(stats.medianX) : 'n/a';
+      const medY = Number.isFinite(stats?.medianY) ? formatNumber(stats.medianY) : 'n/a';
+      const sign = r >= 0 ? '+' : '';
+      const pStr = Number.isFinite(p) ? formatNumber(p, 4) : 'n/a';
+      const tStr = Number.isFinite(t) && Number.isFinite(df) ? ` | t(${df})=${formatNumber(t)}` : '';
+      const r2Str = Number.isFinite(r2) ? ` | r²=${formatNumber(r2)}` : '';
+      const ciStr = Number.isFinite(ciL) && Number.isFinite(ciU)
+        ? ` | 95% CI [${formatNumber(ciL)}, ${formatNumber(ciU)}]`
+        : '';
+      console.log(`  ${label}: n=${n} | r=${sign}${formatNumber(r)}${r2Str}${tStr} | p=${pStr}${ciStr} | meanX=${meanX} | meanY=${meanY} | medianX=${medX} | medianY=${medY}`);
+    };
+
+    printCorr('Gesamt', artistVsSurveyOhs);
+    if (artistVsSurveyOhs.byGender) {
+      printCorr('m', artistVsSurveyOhs.byGender.m);
+      printCorr('w', artistVsSurveyOhs.byGender.w);
+    }
+    if (Array.isArray(artistVsSurveyOhs.exclusions) && artistVsSurveyOhs.exclusions.length) {
+      console.log('  Ausgeschlossene Datensätze (OHS-Korrelation):');
+      artistVsSurveyOhs.exclusions.slice(0, 10).forEach((ex) => {
+        const gender = ex.row?.GENDER ?? '';
+        const musicRaw = ex.row?.MUSIK_RAW ?? ex.row?.MUSIK ?? '';
+        console.log(`    idx=${ex.index} | reason=${ex.reason} | gender=${gender} | music=${JSON.stringify(musicRaw)}`);
+      });
+      if (artistVsSurveyOhs.exclusions.length > 10) {
+        console.log(`    ... ${artistVsSurveyOhs.exclusions.length - 10} weitere`);
+      }
+    }
+  }
+
+  if (questionnaireOhsVsAge) {
+    console.log('\n## OHS (Fragebogen) vs Age');
+    const stats = questionnaireOhsVsAge;
+    const n = stats?.n ?? 0;
+    const r = stats?.r;
+    const p = stats?.p;
+    const r2 = stats?.rSquared;
+    const t = stats?.t;
+    const df = stats?.df;
+    const ciL = stats?.ciLower;
+    const ciU = stats?.ciUpper;
+    const meanOhs = Number.isFinite(stats?.meanY) ? formatNumber(stats.meanY) : 'n/a';
+    const medOhs = Number.isFinite(stats?.medianY) ? formatNumber(stats.medianY) : 'n/a';
     if (!n || !Number.isFinite(r)) {
-      console.log('Not enough paired OHS data to compute correlation.');
+      console.log('  Not enough data to compute correlation.');
     } else {
       const sign = r >= 0 ? '+' : '';
       const pStr = Number.isFinite(p) ? formatNumber(p, 4) : 'n/a';
-      console.log(`n=${n} | r=${sign}${formatNumber(r)} | p=${pStr}`);
+      const tStr = Number.isFinite(t) && Number.isFinite(df) ? ` | t(${df})=${formatNumber(t)}` : '';
+      const r2Str = Number.isFinite(r2) ? ` | r²=${formatNumber(r2)}` : '';
+      const ciStr = Number.isFinite(ciL) && Number.isFinite(ciU)
+        ? ` | 95% CI [${formatNumber(ciL)}, ${formatNumber(ciU)}]`
+        : '';
+      console.log(`  n=${n} | r=${sign}${formatNumber(r)}${r2Str}${tStr} | p=${pStr}${ciStr} | mean(OHS)=${meanOhs} | median(OHS)=${medOhs}`);
+    }
+  }
+
+  if (musicOhsVsAge) {
+    console.log('\n## OHS (gehört, Artist-Avg) vs Age');
+    const stats = musicOhsVsAge;
+    const n = stats?.n ?? 0;
+    const r = stats?.r;
+    const p = stats?.p;
+    const r2 = stats?.rSquared;
+    const t = stats?.t;
+    const df = stats?.df;
+    const ciL = stats?.ciLower;
+    const ciU = stats?.ciUpper;
+    const meanOhs = Number.isFinite(stats?.meanY) ? formatNumber(stats.meanY) : 'n/a';
+    const medOhs = Number.isFinite(stats?.medianY) ? formatNumber(stats.medianY) : 'n/a';
+    if (!n || !Number.isFinite(r)) {
+      console.log('  Not enough data to compute correlation.');
+    } else {
+      const sign = r >= 0 ? '+' : '';
+      const pStr = Number.isFinite(p) ? formatNumber(p, 4) : 'n/a';
+      const tStr = Number.isFinite(t) && Number.isFinite(df) ? ` | t(${df})=${formatNumber(t)}` : '';
+      const r2Str = Number.isFinite(r2) ? ` | r²=${formatNumber(r2)}` : '';
+      const ciStr = Number.isFinite(ciL) && Number.isFinite(ciU)
+        ? ` | 95% CI [${formatNumber(ciL)}, ${formatNumber(ciU)}]`
+        : '';
+      console.log(`  n=${n} | r=${sign}${formatNumber(r)}${r2Str}${tStr} | p=${pStr}${ciStr} | mean(OHS)=${meanOhs} | median(OHS)=${medOhs}`);
     }
   }
 
@@ -592,7 +775,14 @@ function printOverallFindingsReport({ musicStats, participationRates, itemStats,
   const globalCorr = itemCorrelations?.global || {};
 
   const allAge = allKeys
-    .map(k => ({ item: k, n: globalCorr?.[k]?.n ?? 0, r_age: globalCorr?.[k]?.r_age }))
+    .map(k => ({
+      item: k,
+      n: globalCorr?.[k]?.n ?? 0,
+      r_age: globalCorr?.[k]?.r_age,
+      p_age: globalCorr?.[k]?.p_age,
+      ciL: globalCorr?.[k]?.ci_age_lower,
+      ciU: globalCorr?.[k]?.ci_age_upper
+    }))
     .filter(x => Number.isFinite(x.r_age))
     .sort((a, b) => Math.abs(b.r_age) - Math.abs(a.r_age));
 
@@ -602,7 +792,9 @@ function printOverallFindingsReport({ musicStats, participationRates, itemStats,
   } else {
     allAge.forEach((f, idx) => {
       const sign = f.r_age >= 0 ? '+' : '';
-      console.log(`  ${idx + 1}. ${f.item} | n=${f.n} | r_age=${sign}${formatNumber(f.r_age)}`);
+      const pStr = Number.isFinite(f.p_age) ? ` | p=${formatNumber(f.p_age, 4)}` : '';
+      const ciStr = Number.isFinite(f.ciL) && Number.isFinite(f.ciU) ? ` | 95% CI [${formatNumber(f.ciL)}, ${formatNumber(f.ciU)}]` : '';
+      console.log(`  ${idx + 1}. ${f.item} | n=${f.n} | r_age=${sign}${formatNumber(f.r_age)}${pStr}${ciStr}`);
     });
   }
 
@@ -624,7 +816,7 @@ function printOverallFindingsReport({ musicStats, participationRates, itemStats,
   console.log('\n## Significant findings (filtered)');
   if (significantFindings?.thresholds) {
     const t = significantFindings.thresholds;
-    console.log(`Thresholds: minN>=${t.minN}, |r_age|>=${t.minAbsR}, eta²_gender>=${t.minEta2}`);
+    console.log(`Thresholds: minN>=${t.minN}, |r_age|>=${t.minAbsR}, p<=${t.maxP}, CI excludes 0=${t.requireCIExcludesZero}, eta²_gender>=${t.minEta2}`);
   }
 
   const topAge = significantFindings?.strongestAgeCorrelations || [];
@@ -634,7 +826,11 @@ function printOverallFindingsReport({ musicStats, participationRates, itemStats,
   } else {
     topAge.slice(0, 10).forEach((f, idx) => {
       const sign = f.r_age >= 0 ? '+' : '';
-      console.log(`  ${idx + 1}. ${f.item} | n=${f.n} | r_age=${sign}${formatNumber(f.r_age)}`);
+      const pStr = Number.isFinite(f.p_age) ? ` | p=${formatNumber(f.p_age, 4)}` : '';
+      const ciStr = Number.isFinite(f.ci_age_lower) && Number.isFinite(f.ci_age_upper)
+        ? ` | 95% CI [${formatNumber(f.ci_age_lower)}, ${formatNumber(f.ci_age_upper)}]`
+        : '';
+      console.log(`  ${idx + 1}. ${f.item} | n=${f.n} | r_age=${sign}${formatNumber(f.r_age)}${pStr}${ciStr}`);
     });
   }
 
@@ -659,7 +855,11 @@ function printOverallFindingsReport({ musicStats, participationRates, itemStats,
       console.log(`  ${g}:`);
       rows.slice(0, 3).forEach((f, idx) => {
         const sign = f.r_age >= 0 ? '+' : '';
-        console.log(`    ${idx + 1}. ${f.item} | n=${f.n} | r_age=${sign}${formatNumber(f.r_age)}`);
+        const pStr = Number.isFinite(f.p_age) ? ` | p=${formatNumber(f.p_age, 4)}` : '';
+        const ciStr = Number.isFinite(f.ci_age_lower) && Number.isFinite(f.ci_age_upper)
+          ? ` | 95% CI [${formatNumber(f.ci_age_lower)}, ${formatNumber(f.ci_age_upper)}]`
+          : '';
+        console.log(`    ${idx + 1}. ${f.item} | n=${f.n} | r_age=${sign}${formatNumber(f.r_age)}${pStr}${ciStr}`);
       });
     }
   }
@@ -682,6 +882,8 @@ function extractSignificantFindings(
     minAbsR: 0.35,
     minEta2: 0.10,
     topK: 20,
+    maxP: 0.05,
+    requireCIExcludesZero: true,
     ...options
   };
 
@@ -702,11 +904,19 @@ function extractSignificantFindings(
     if (!entry) continue;
     const n = entry.n ?? 0;
     const r = entry.r_age;
-    if (n >= opts.minN && Number.isFinite(r) && Math.abs(r) >= opts.minAbsR) {
+    const p = entry.p_age;
+    const ciL = entry.ci_age_lower;
+    const ciU = entry.ci_age_upper;
+    const ciOk = !opts.requireCIExcludesZero || (!Number.isFinite(ciL) || !Number.isFinite(ciU) ? true : (ciL * ciU > 0));
+    const pOk = Number.isFinite(p) ? p <= opts.maxP : false;
+    if (n >= opts.minN && Number.isFinite(r) && Math.abs(r) >= opts.minAbsR && pOk && ciOk) {
       findings.strongestAgeCorrelations.push({
         item: key,
         n,
-        r_age: r
+        r_age: r,
+        p_age: p,
+        ci_age_lower: ciL,
+        ci_age_upper: ciU
       });
     }
   }
@@ -739,8 +949,13 @@ function extractSignificantFindings(
       if (!entry) continue;
       const n = entry.n ?? 0;
       const r = entry.r_age;
-      if (n >= Math.max(3, Math.floor(opts.minN / 2)) && Number.isFinite(r) && Math.abs(r) >= opts.minAbsR) {
-        list.push({ item: key, n, r_age: r });
+      const p = entry.p_age;
+      const ciL = entry.ci_age_lower;
+      const ciU = entry.ci_age_upper;
+      const ciOk = !opts.requireCIExcludesZero || (!Number.isFinite(ciL) || !Number.isFinite(ciU) ? true : (ciL * ciU > 0));
+      const pOk = Number.isFinite(p) ? p <= opts.maxP : false;
+      if (n >= Math.max(3, Math.floor(opts.minN / 2)) && Number.isFinite(r) && Math.abs(r) >= opts.minAbsR && pOk && ciOk) {
+        list.push({ item: key, n, r_age: r, p_age: p, ci_age_lower: ciL, ci_age_upper: ciU });
       }
     }
     list.sort((a, b) => Math.abs(b.r_age) - Math.abs(a.r_age));
@@ -761,7 +976,7 @@ function printSignificantFindings(findings) {
   if (!findings) return;
   const t = findings.thresholds;
   console.log('\n=== Significant findings (filtered) ===');
-  console.log(`Thresholds: minN>=${t.minN}, |r_age|>=${t.minAbsR}, eta²_gender>=${t.minEta2}, topK=${t.topK}`);
+  console.log(`Thresholds: minN>=${t.minN}, |r_age|>=${t.minAbsR}, p<=${t.maxP}, CI excludes 0=${t.requireCIExcludesZero}, eta²_gender>=${t.minEta2}, topK=${t.topK}`);
 
   console.log('\n-- Strongest correlations with AGE (global) --');
   if (!findings.strongestAgeCorrelations.length) {
@@ -769,7 +984,11 @@ function printSignificantFindings(findings) {
   } else {
     findings.strongestAgeCorrelations.forEach((f, idx) => {
       const sign = f.r_age >= 0 ? '+' : '';
-      console.log(`  ${idx + 1}. ${f.item} | n=${f.n} | r_age=${sign}${formatNumber(f.r_age)}`);
+      const pStr = Number.isFinite(f.p_age) ? ` | p=${formatNumber(f.p_age, 4)}` : '';
+      const ciStr = Number.isFinite(f.ci_age_lower) && Number.isFinite(f.ci_age_upper)
+        ? ` | 95% CI [${formatNumber(f.ci_age_lower)}, ${formatNumber(f.ci_age_upper)}]`
+        : '';
+      console.log(`  ${idx + 1}. ${f.item} | n=${f.n} | r_age=${sign}${formatNumber(f.r_age)}${pStr}${ciStr}`);
     });
   }
 
@@ -797,7 +1016,11 @@ function printSignificantFindings(findings) {
       }
       rows.forEach((f, idx) => {
         const sign = f.r_age >= 0 ? '+' : '';
-        console.log(`    ${idx + 1}. ${f.item} | n=${f.n} | r_age=${sign}${formatNumber(f.r_age)}`);
+        const pStr = Number.isFinite(f.p_age) ? ` | p=${formatNumber(f.p_age, 4)}` : '';
+        const ciStr = Number.isFinite(f.ci_age_lower) && Number.isFinite(f.ci_age_upper)
+          ? ` | 95% CI [${formatNumber(f.ci_age_lower)}, ${formatNumber(f.ci_age_upper)}]`
+          : '';
+        console.log(`    ${idx + 1}. ${f.item} | n=${f.n} | r_age=${sign}${formatNumber(f.r_age)}${pStr}${ciStr}`);
       });
     }
   }
@@ -850,6 +1073,7 @@ async function generatePlotsForSignificantFindings({ data, itemStats, itemCorrel
 
   const width = 900;
   const height = 500;
+  const baseFont = { family: 'Times New Roman, Times, serif', size: 14 };
   const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, backgroundColour: 'white' });
 
   const genders = Array.from(
@@ -908,7 +1132,9 @@ async function generatePlotsForSignificantFindings({ data, itemStats, itemCorrel
       const trend2 = makeTrend(points2);
 
       const r1 = itemCorrelations?.global?.[item1]?.r_age;
+      const p1 = itemCorrelations?.global?.[item1]?.p_age;
       const r2 = itemCorrelations?.global?.[item2]?.r_age;
+      const p2 = itemCorrelations?.global?.[item2]?.p_age;
       const filename = `scatter_age_${sanitizeFilename(group)}_SQ001_SQ002.png`;
       const buffer = await chartJSNodeCanvas.renderToBuffer({
         type: 'scatter',
@@ -916,7 +1142,7 @@ async function generatePlotsForSignificantFindings({ data, itemStats, itemCorrel
           datasets: [
             ...(points1.length
               ? [{
-                label: `${item1} (n=${points1.length}, r=${formatNumber(r1)})`,
+                label: `${item1} (n=${points1.length}, r=${formatNumber(r1)}, p=${formatNumber(p1, 4)})`,
                 data: points1,
                 pointRadius: 4,
                 pointHoverRadius: 5,
@@ -935,7 +1161,7 @@ async function generatePlotsForSignificantFindings({ data, itemStats, itemCorrel
               : []),
             ...(points2.length
               ? [{
-                label: `${item2} (n=${points2.length}, r=${formatNumber(r2)})`,
+                label: `${item2} (n=${points2.length}, r=${formatNumber(r2)}, p=${formatNumber(p2, 4)})`,
                 data: points2,
                 pointRadius: 4,
                 pointHoverRadius: 5,
@@ -957,12 +1183,12 @@ async function generatePlotsForSignificantFindings({ data, itemStats, itemCorrel
         options: {
           responsive: false,
           plugins: {
-            legend: { position: 'top' },
-            title: { display: true, text: `Scatter: ${group} SQ001 vs SQ002 over age` }
+            legend: { position: 'top', labels: { font: baseFont } },
+            title: { display: true, text: `Scatter: ${group} SQ001 vs SQ002 over age`, font: { ...baseFont, size: 16 } }
           },
           scales: {
-            x: { title: { display: true, text: 'Age' } },
-            y: { title: { display: true, text: group } }
+            x: { title: { display: true, text: 'Age', font: baseFont }, ticks: { font: baseFont } },
+            y: { title: { display: true, text: group, font: baseFont }, ticks: { font: baseFont } }
           }
         }
       });
@@ -990,13 +1216,14 @@ async function generatePlotsForSignificantFindings({ data, itemStats, itemCorrel
         : [];
 
       const rAge = itemCorrelations?.global?.[item]?.r_age;
+      const pAge = itemCorrelations?.global?.[item]?.p_age;
       const filename = `scatter_age_${sanitizeFilename(item)}.png`;
       const buffer = await chartJSNodeCanvas.renderToBuffer({
         type: 'scatter',
         data: {
           datasets: [
             {
-              label: `${item} vs AGE (n=${points.length}, r=${formatNumber(rAge)})`,
+              label: `${item} vs AGE (n=${points.length}, r=${formatNumber(rAge)}, p=${formatNumber(pAge, 4)})`,
               data: points,
               pointRadius: 4,
               pointHoverRadius: 5,
@@ -1017,12 +1244,12 @@ async function generatePlotsForSignificantFindings({ data, itemStats, itemCorrel
         options: {
           responsive: false,
           plugins: {
-            legend: { position: 'top' },
-            title: { display: true, text: `Scatter: ${item} vs Age` }
+            legend: { position: 'top', labels: { font: baseFont } },
+            title: { display: true, text: `Scatter: ${item} vs Age`, font: { ...baseFont, size: 16 } }
           },
           scales: {
-            x: { title: { display: true, text: 'Age' } },
-            y: { title: { display: true, text: item } }
+            x: { title: { display: true, text: 'Age', font: baseFont }, ticks: { font: baseFont } },
+            y: { title: { display: true, text: item, font: baseFont }, ticks: { font: baseFont } }
           }
         }
       });
@@ -1059,8 +1286,8 @@ async function generatePlotsForSignificantFindings({ data, itemStats, itemCorrel
           responsive: false,
           animation: false,
           plugins: {
-            legend: { position: 'top' },
-            title: { display: true, text: `Group means by gender: ${item}` },
+            legend: { position: 'top', labels: { font: baseFont } },
+            title: { display: true, text: `Group means by gender: ${item}`, font: { ...baseFont, size: 16 } },
             tooltip: {
               callbacks: {
                 label: (ctx) => {
@@ -1072,8 +1299,8 @@ async function generatePlotsForSignificantFindings({ data, itemStats, itemCorrel
             }
           },
           scales: {
-            x: { title: { display: true, text: 'Gender' } },
-            y: { title: { display: true, text: `Mean of ${item}` } }
+            x: { title: { display: true, text: 'Gender', font: baseFont }, ticks: { font: baseFont } },
+            y: { title: { display: true, text: `Mean of ${item}`, font: baseFont }, ticks: { font: baseFont } }
           },
           // Use a plugin without extra deps to draw labels on the bars.
           plugins: [
@@ -1083,7 +1310,7 @@ async function generatePlotsForSignificantFindings({ data, itemStats, itemCorrel
                 const { ctx } = chart;
                 const meta = chart.getDatasetMeta(0);
                 ctx.save();
-                ctx.font = '12px sans-serif';
+                ctx.font = '12px "Times New Roman", Times, serif';
                 ctx.fillStyle = '#111';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
@@ -1107,5 +1334,96 @@ async function generatePlotsForSignificantFindings({ data, itemStats, itemCorrel
       });
       await fs.promises.writeFile(path.join(outDir, filename), buffer);
     }
+  }
+}
+
+async function generateOhsCorrelationPlots({ artistCorrelation, questionnaireAgeCorrelation, musicAgeCorrelation, outDir }) {
+  await fs.promises.mkdir(outDir, { recursive: true });
+
+  const width = 900;
+  const height = 500;
+  const baseFont = { family: 'Times New Roman, Times, serif', size: 14 };
+  const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, backgroundColour: 'white' });
+
+  const renderScatter = async (label, pairs, stats, filename, { xLabel, yLabel }) => {
+    if (!pairs || pairs.length < 2) return;
+    const points = pairs
+      .filter(p => Number.isFinite(p?.x) && Number.isFinite(p?.y))
+      .map(p => ({ x: p.x, y: p.y }));
+    if (points.length < 2) return;
+    const xs = points.map(p => p.x);
+    const ys = points.map(p => p.y);
+    const lr = linearRegression(xs, ys);
+    const trend = lr
+      ? (() => {
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        return [
+          { x: minX, y: lr.slope * minX + lr.intercept },
+          { x: maxX, y: lr.slope * maxX + lr.intercept }
+        ];
+      })()
+      : [];
+
+    const r = stats?.r;
+    const pVal = stats?.p;
+    const rStr = Number.isFinite(r) ? `r=${formatNumber(r)}` : 'r=n/a';
+    const pStr = Number.isFinite(pVal) ? `p=${formatNumber(pVal, 4)}` : 'p=n/a';
+    const title = `${label} (${rStr}, ${pStr})`;
+
+    const buffer = await chartJSNodeCanvas.renderToBuffer({
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: `${label} Daten (n=${points.length})`,
+            data: points,
+            pointRadius: 4,
+            pointHoverRadius: 5,
+            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+          },
+          ...(trend.length
+            ? [{
+              label: `${label} Trendlinie`,
+              data: trend,
+              showLine: true,
+              pointRadius: 0,
+              borderWidth: 2,
+              borderColor: 'rgba(255, 99, 132, 0.9)'
+            }]
+            : [])
+        ]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: { position: 'top', labels: { font: baseFont } },
+          title: { display: true, text: title, font: { ...baseFont, size: 16 } }
+        },
+        scales: {
+          x: { title: { display: true, text: xLabel, font: baseFont }, ticks: { font: baseFont } },
+          y: { title: { display: true, text: yLabel, font: baseFont }, ticks: { font: baseFont } }
+        }
+      }
+    });
+    await fs.promises.writeFile(path.join(outDir, filename), buffer);
+  };
+
+  if (artistCorrelation?.pairs?.length) {
+    await renderScatter('OHS Musik vs Fragebogen (Gesamt)', artistCorrelation.pairs, artistCorrelation, 'scatter_ohs_overall.png', { xLabel: 'Fragebogen-OHS', yLabel: 'Artist-OHS' });
+    if (artistCorrelation.byGender?.m && artistCorrelation.pairsByGender?.m?.length) {
+      await renderScatter('OHS Musik vs Fragebogen (m)', artistCorrelation.pairsByGender.m, artistCorrelation.byGender.m, 'scatter_ohs_m.png', { xLabel: 'Fragebogen-OHS', yLabel: 'Artist-OHS' });
+    }
+    if (artistCorrelation.byGender?.w && artistCorrelation.pairsByGender?.w?.length) {
+      await renderScatter('OHS Musik vs Fragebogen (w)', artistCorrelation.pairsByGender.w, artistCorrelation.byGender.w, 'scatter_ohs_w.png', { xLabel: 'Fragebogen-OHS', yLabel: 'Artist-OHS' });
+    }
+  }
+  if (questionnaireAgeCorrelation?.pairs?.length) {
+    const stats = questionnaireAgeCorrelation;
+    await renderScatter('Fragebogen-OHS vs Age', stats.pairs, stats, 'scatter_age_questionnaire_ohs.png', { xLabel: 'Age', yLabel: 'Fragebogen-OHS' });
+  }
+  if (musicAgeCorrelation?.pairs?.length) {
+    const stats = musicAgeCorrelation;
+    await renderScatter('Music-OHS vs Age', stats.pairs, stats, 'scatter_age_music_ohs.png', { xLabel: 'Age', yLabel: 'Artist-OHS' });
   }
 }
