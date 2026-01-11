@@ -1,5 +1,3 @@
-[18:31:45.253] [32mINFO[39m (448755): [36mConnecting to InfluxDB at http://localhost:8181, database: suchtpraev[39m
-[18:31:45.362] [32mINFO[39m (448755): [36mConnected to Postgres at [39m
 
 ==============================
  UniSuchtprävention — Findings
@@ -27,14 +25,14 @@ Unique songs list:
   
 
 ## OHS correlation (artists listened vs questionnaire)
-  Gesamt: n=19 | r=-0.596 | r²=0.355 | t(17)=-3.057 | p=0.0071 | 95% CI [-0.826, -0.194] | meanX=0.459 | meanY=17.526 | medianX=0.422 | medianY=19.000
+  Gesamt: n=19 | r=-0.594 | r²=0.352 | t(17)=-3.042 | p=0.0074 | 95% CI [-0.825, -0.191] | meanX=0.459 | meanY=17.421 | medianX=0.422 | medianY=19.000
   m: n=8 | r=-0.529 | r²=0.280 | t(6)=-1.528 | p=0.1774 | 95% CI [-0.899, 0.280] | meanX=0.334 | meanY=16.250 | medianX=0.315 | medianY=16.500
-  w: n=9 | r=-0.786 | r²=0.618 | t(7)=-3.365 | p=0.0120 | 95% CI [-0.953, -0.255] | meanX=0.641 | meanY=17.778 | medianX=0.806 | medianY=16.000
+  w: n=9 | r=-0.758 | r²=0.574 | t(7)=-3.073 | p=0.0180 | 95% CI [-0.946, -0.189] | meanX=0.641 | meanY=17.556 | medianX=0.806 | medianY=16.000
   Ausgeschlossene Datensätze (OHS-Korrelation):
     idx=16 | reason=no artists parsed | gender=w | music={"genres":["HipHop","Techno","Melodic Rock","Indie"],"artists":[],"songs":[]}
 
 ## OHS (Fragebogen) vs Age
-  n=20 | r=+0.553 | r²=0.306 | t(18)=2.817 | p=0.0114 | 95% CI [0.147, 0.800] | mean(OHS)=18.350 | median(OHS)=19.000
+  n=20 | r=+0.523 | r²=0.273 | t(18)=2.601 | p=0.0181 | 95% CI [0.104, 0.784] | mean(OHS)=18.250 | median(OHS)=19.000
 
 ## OHS (gehört, Artist-Avg) vs Age
   n=19 | r=-0.164 | r²=0.027 | t(17)=-0.685 | p=0.5028 | 95% CI [-0.575, 0.314] | mean(OHS)=0.459 | median(OHS)=0.422
@@ -55,21 +53,21 @@ Correlations with age (all items, sorted by |r|):
   8. B4[SQ001] | n=20 | r_age=+0.330 | p=0.1552 | 95% CI [-0.132, 0.674]
   9. A1[AStim] | n=20 | r_age=-0.313 | p=0.1794 | 95% CI [-0.663, 0.151]
   10. A1[AAna] | n=20 | r_age=-0.306 | p=0.1897 | 95% CI [-0.659, 0.158]
-  11. B1[SQ002] | n=20 | r_age=-0.279 | p=0.2343 | 95% CI [-0.642, 0.187]
-  12. B4[SQ002] | n=20 | r_age=-0.276 | p=0.2391 | 95% CI [-0.640, 0.190]
-  13. B5[SQ001] | n=20 | r_age=+0.275 | p=0.2407 | 95% CI [-0.191, 0.640]
+  11. B4[SQ002] | n=20 | r_age=-0.276 | p=0.2391 | 95% CI [-0.640, 0.190]
+  12. B5[SQ001] | n=20 | r_age=+0.275 | p=0.2407 | 95% CI [-0.191, 0.640]
+  13. B1[SQ002] | n=20 | r_age=-0.259 | p=0.2703 | 95% CI [-0.629, 0.207]
   14. B2[SQ002] | n=20 | r_age=-0.252 | p=0.2844 | 95% CI [-0.625, 0.215]
   15. R1[RSti] | n=20 | r_age=-0.132 | p=0.5797 | 95% CI [-0.543, 0.330]
   16. B5[SQ002] | n=20 | r_age=-0.090 | p=0.7048 | 95% CI [-0.512, 0.367]
   17. A1[AAlk] | n=20 | r_age=+0.079 | p=0.7420 | 95% CI [-0.377, 0.504]
-  18. R1[RCan] | n=20 | r_age=-0.021 | p=0.9288 | 95% CI [-0.460, 0.425]
+  18. R1[RCan] | n=20 | r_age=+0.034 | p=0.8872 | 95% CI [-0.415, 0.469]
 
 Gender effects (eta², all items, sorted desc):
-  1. B1[SQ002] | n=20 | eta²_gender=0.202
-  2. A1[AAlk] | n=20 | eta²_gender=0.192
+  1. A1[AAlk] | n=20 | eta²_gender=0.192
+  2. B1[SQ002] | n=20 | eta²_gender=0.095
   3. B1[SQ001] | n=20 | eta²_gender=0.090
-  4. R1[RCan] | n=20 | eta²_gender=0.083
-  5. A1[AStim] | n=20 | eta²_gender=0.056
+  4. A1[AStim] | n=20 | eta²_gender=0.056
+  5. R1[RCan] | n=20 | eta²_gender=0.047
   6. B4[SQ002] | n=20 | eta²_gender=0.040
   7. R1[RSti] | n=20 | eta²_gender=0.038
   8. A1[AAna] | n=20 | eta²_gender=0.034
@@ -96,8 +94,7 @@ Top correlations with age:
   6. B1[SQ001] | n=20 | r_age=+0.468 | p=0.0375 | 95% CI [0.032, 0.754]
 
 Top effects by gender (eta²):
-  1. B1[SQ002] | n=20 | eta²_gender=0.202
-  2. A1[AAlk] | n=20 | eta²_gender=0.192
+  1. A1[AAlk] | n=20 | eta²_gender=0.192
 
 Strongest age correlations within gender (top 3 each):
   m:
@@ -107,9 +104,3 @@ Strongest age correlations within gender (top 3 each):
   w:
     1. R1[RAlk] | n=10 | r_age=+0.713 | p=0.0208 | 95% CI [0.150, 0.926]
     2. B1[SQ001] | n=10 | r_age=+0.646 | p=0.0436 | 95% CI [0.028, 0.907]
-
-## Plots
-PNG plots are written to: src/tools/plots
-
-=== Plots ===
-Writing plots to: /home/wolff/UniSuchtpraevention/plots

@@ -29,11 +29,123 @@ type CsvRow = Record<string, string>;
 const DIMENSIONS = ['wording', 'perspective', 'context', 'glamorization', 'harmAcknowledgement'] as const;
 type Dimension = (typeof DIMENSIONS)[number];
 
+// Wertebereiche der Dimensionen (für Dokumentation und Normalisierung)
+const DIMENSION_RANGES: Record<Dimension, { min: number; max: number }> = {
+  wording: { min: -2, max: 2 },
+  perspective: { min: -2, max: 2 },
+  context: { min: -2, max: 2 },
+  glamorization: { min: -2, max: 2 },
+  harmAcknowledgement: { min: -2, max: 0 }, // Nur negative Werte sinnvoll
+};
+
 function stddevSample(xs: number[]): number | null {
   if (xs.length < 2) return null;
   const v = varianceSample(xs);
   if (v === null) return null;
   return Math.sqrt(v);
+}
+
+/**
+ * Pearson correlation coefficient
+ */
+function pearsonCorrelation(xs: number[], ys: number[]): number | null {
+  if (xs.length !== ys.length || xs.length < 2) return null;
+  const n = xs.length;
+  const mx = mean(xs);
+  const my = mean(ys);
+  if (mx === null || my === null) return null;
+
+  let num = 0;
+  let dx2 = 0;
+  let dy2 = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = xs[i] - mx;
+    const dy = ys[i] - my;
+    num += dx * dy;
+    dx2 += dx * dx;
+    dy2 += dy * dy;
+  }
+  const denom = Math.sqrt(dx2 * dy2);
+  if (denom === 0) return null;
+  return num / denom;
+}
+
+/**
+ * Z-standardize values within each column (item)
+ */
+function zStandardizeMatrix(matrix: number[][]): number[][] {
+  const n = matrix.length;
+  const k = matrix[0]?.length ?? 0;
+  if (n < 2 || k < 1) return matrix;
+
+  const result: number[][] = matrix.map(row => [...row]);
+
+  for (let j = 0; j < k; j++) {
+    const col: number[] = [];
+    for (let i = 0; i < n; i++) col.push(matrix[i][j]);
+    const m = mean(col);
+    const sd = stddevSample(col);
+    if (m === null || sd === null || sd === 0) continue;
+    for (let i = 0; i < n; i++) {
+      result[i][j] = (matrix[i][j] - m) / sd;
+    }
+  }
+  return result;
+}
+
+/**
+ * Standardized Cronbach's alpha
+ * Uses correlation matrix instead of covariance matrix.
+ * Under tau-equivalence, standardized alpha ≈ raw alpha.
+ */
+function cronbachAlphaStandardized(matrix: number[][]): { alpha: number | null; avgInterItemCorr: number | null; interItemCorrVariance: number | null; itemTotalCorrs: number[] } {
+  const n = matrix.length;
+  const k = matrix[0]?.length ?? 0;
+  const result = { alpha: null as number | null, avgInterItemCorr: null as number | null, interItemCorrVariance: null as number | null, itemTotalCorrs: [] as number[] };
+  
+  if (n < 2 || k < 2) return result;
+
+  // Extract columns (items)
+  const cols: number[][] = [];
+  for (let j = 0; j < k; j++) {
+    const col: number[] = [];
+    for (let i = 0; i < n; i++) col.push(matrix[i][j]);
+    cols.push(col);
+  }
+
+  // Compute inter-item correlation matrix (lower triangle)
+  const interItemCorrs: number[] = [];
+  for (let i = 0; i < k; i++) {
+    for (let j = i + 1; j < k; j++) {
+      const r = pearsonCorrelation(cols[i], cols[j]);
+      if (r !== null) interItemCorrs.push(r);
+    }
+  }
+
+  if (interItemCorrs.length === 0) return result;
+
+  // Average inter-item correlation
+  const avgR = mean(interItemCorrs);
+  result.avgInterItemCorr = avgR;
+
+  // Variance of inter-item correlations (tau-equivalence check)
+  result.interItemCorrVariance = varianceSample(interItemCorrs);
+
+  // Standardized alpha formula: k * avgR / (1 + (k-1) * avgR)
+  if (avgR !== null) {
+    result.alpha = (k * avgR) / (1 + (k - 1) * avgR);
+  }
+
+  // Item-total correlations (corrected: correlate item with sum of other items)
+  const totals = matrix.map(row => row.reduce((a, b) => a + b, 0));
+  for (let j = 0; j < k; j++) {
+    // Corrected item-total: total minus this item
+    const correctedTotals = matrix.map((row, i) => totals[i] - row[j]);
+    const r = pearsonCorrelation(cols[j], correctedTotals);
+    result.itemTotalCorrs.push(r ?? 0);
+  }
+
+  return result;
 }
 
 function printHelp() {
@@ -54,8 +166,13 @@ Diagnostics:
   --topDisagreements <N>         How many disagreement units to print (default: 10)
 
 What it computes:
-  - Cronbach's alpha: internal consistency across the 5 rating dimensions.
+  - Cronbach's alpha (raw): internal consistency across the 5 rating dimensions.
     Units are aggregated as the mean per unit (across raters), then alpha is computed across dimensions.
+  - Cronbach's alpha (standardized): uses correlation matrix; equals raw alpha under tau-equivalence.
+  - Tau-Äquivalenz Diagnostik:
+      * Differenz raw vs standardized alpha (>0.05 deutet auf Verletzung)
+      * Varianz der Inter-Item-Korrelationen (sollte niedrig sein)
+      * Item-Total-Korrelationen (sollten ähnlich sein)
   - Krippendorff's alpha (interval distance): inter-rater reliability per dimension.
 
 Assumptions about the CSV:
@@ -396,6 +513,7 @@ async function main() {
   }
 
   const alphaCronbach = cronbachAlpha(matrix);
+  const tauEquiv = cronbachAlphaStandardized(matrix);
 
   // Output
   console.log('=== Reliability metrics ===');
@@ -404,8 +522,46 @@ async function main() {
   console.log(`Rater key for Krippendorff: ${raterKey} (ratingId|model)`);
   console.log('');
 
+  console.log('Hinweis zu Wertebereichen:');
+  DIMENSIONS.forEach(d => {
+    const range = DIMENSION_RANGES[d];
+    console.log(`  ${d}: [${range.min}, ${range.max}]`);
+  });
+  console.log('  → harmAcknowledgement hat kleineren Wertebereich (nur -2 bis 0)');
+  console.log('');
+
   console.log('Cronbach\'s alpha (across dimensions; unit means across raters):');
-  console.log(`  units_used=${matrix.length} | alpha=${alphaCronbach === null ? 'n/a' : alphaCronbach.toFixed(4)}`);
+  console.log(`  units_used=${matrix.length}`);
+  console.log(`  alpha (raw)=${alphaCronbach === null ? 'n/a' : alphaCronbach.toFixed(4)}`);
+  console.log(`  alpha (standardized)=${tauEquiv.alpha === null ? 'n/a' : tauEquiv.alpha.toFixed(4)}`);
+  console.log('  (Standardized alpha nutzt Korrelationsmatrix statt Kovarianzmatrix)');
+  console.log('');
+
+  console.log('Tau-Äquivalenz Diagnostik (Original-Skalen):');
+  console.log(`  alpha (standardized)=${tauEquiv.alpha === null ? 'n/a' : tauEquiv.alpha.toFixed(4)}`);
+  const alphaDiff = (alphaCronbach !== null && tauEquiv.alpha !== null) ? Math.abs(alphaCronbach - tauEquiv.alpha) : null;
+  console.log(`  Differenz (raw - standardized)=${alphaDiff === null ? 'n/a' : alphaDiff.toFixed(4)} ${alphaDiff !== null && alphaDiff > 0.05 ? '⚠ (>0.05 deutet auf Verletzung der Tau-Äquivalenz)' : ''}`);
+  console.log(`  Durchschn. Inter-Item-Korrelation=${tauEquiv.avgInterItemCorr === null ? 'n/a' : tauEquiv.avgInterItemCorr.toFixed(4)}`);
+  console.log(`  Varianz der Inter-Item-Korrelationen=${tauEquiv.interItemCorrVariance === null ? 'n/a' : tauEquiv.interItemCorrVariance.toFixed(4)}`);
+  console.log('  Korrigierte Item-Total-Korrelationen:');
+  DIMENSIONS.forEach((d, i) => {
+    const r = tauEquiv.itemTotalCorrs[i];
+    const range = DIMENSION_RANGES[d];
+    const rangeNote = (range.max - range.min) !== 4 ? ' (Wertebereich: ' + range.min + ' bis ' + range.max + ')' : '';
+    console.log(`    ${d}: ${r === undefined || r === null ? 'n/a' : r.toFixed(4)}${rangeNote}`);
+  });
+  console.log('');
+
+  console.log('Interpretation Tau-Äquivalenz:');
+  console.log('  Tau-Äquivalenz erfordert gleiche "true score"-Varianzen über Items.');
+  console.log('  Prüfung: Differenz raw vs. standardized alpha.');
+  if (alphaDiff !== null && alphaDiff <= 0.05) {
+    console.log(`  → Differenz ${alphaDiff.toFixed(4)} ≤ 0.05: Tau-Äquivalenz kann angenommen werden.`);
+  } else if (alphaDiff !== null) {
+    console.log(`  → Differenz ${alphaDiff.toFixed(4)} > 0.05: Hinweis auf Verletzung der Tau-Äquivalenz.`);
+  }
+  console.log('  Bei mehrdimensionalen Konstrukten (verschiedene Facetten) ist');
+  console.log('  Varianz in Inter-Item-Korrelationen erwartbar und kein Defizit.');
   console.log('');
 
   console.log('Krippendorff\'s alpha (interval; per dimension):');
