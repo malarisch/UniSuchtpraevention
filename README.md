@@ -1,6 +1,6 @@
 # Gepanschte Lines statt Punchlines?!
 
-[![wakatime](https://wakatime.com/badge/github/malarisch/UniSuchtpraevention.svg)](https://wakatime.com/badge/github/malarisch/UniSuchtpraevention) [![Docker Image CI](https://github.com/malarisch/UniSuchtpraevention/actions/workflows/docker-image.yml/badge.svg)](https://github.com/malarisch/UniSuchtpraevention/actions/workflows/docker-image.yml)
+[![wakatime](https://wakatime.com/badge/github/malarisch/UniSuchtpraevention.svg)](https://wakatime.com/badge/github/malarisch/UniSuchtpraevention) [![wakatime](https://wakatime.com/badge/user/b3e54a84-22c6-466c-978f-f9e846a33afb/project/63364d2a-d154-439d-b8dd-4ee77eb18ebf.svg)](https://wakatime.com/badge/user/b3e54a84-22c6-466c-978f-f9e846a33afb/project/63364d2a-d154-439d-b8dd-4ee77eb18ebf) [![Docker Image CI](https://github.com/malarisch/UniSuchtpraevention/actions/workflows/docker-image.yml/badge.svg)](https://github.com/malarisch/UniSuchtpraevention/actions/workflows/docker-image.yml)
 
 Dieses Projekt analysiert Songtexte auf Substanzerwähnungen und speichert die Ergebnisse in einer Datenbank.
 Der Code läuft vollständig unter TypeScript. Für eine einheitliche Entwicklungs- und Produktionsumgebung kommt Docker zum Einsatz.
