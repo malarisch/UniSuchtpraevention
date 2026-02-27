@@ -1,4 +1,4 @@
-# UniSuchtprävention
+# Gepanschte Lines statt Punchlines?!
 
 [![wakatime](https://wakatime.com/badge/github/malarisch/UniSuchtpraevention.svg)](https://wakatime.com/badge/github/malarisch/UniSuchtpraevention) [![Docker Image CI](https://github.com/malarisch/UniSuchtpraevention/actions/workflows/docker-image.yml/badge.svg)](https://github.com/malarisch/UniSuchtpraevention/actions/workflows/docker-image.yml)
 
@@ -31,7 +31,7 @@ Das Modell `gpt-oss-20b` hat 20 Milliarden Parameter und stellt entsprechende An
 | **Disk** | 50 GB frei | 20 GB frei (Modell ~15 GB + Services) |
 | **CPU** | 8 Kerne | 4 Kerne |
 
-> Ohne dedizierte GPU läuft die Inferenz auf der CPU und ist deutlich langsamer. Für Produktionsbetrieb wird eine NVIDIA-GPU mit CUDA-Support empfohlen.
+> Ohne dedizierte GPU läuft die Inferenz auf der CPU und ist deutlich langsamer. Daher wird ein Rechner mit starker GPU oder ein moderner Mac mit M-Chip und genügend RAM empfohlen.
 
 ### API-Zugangsdaten
 
